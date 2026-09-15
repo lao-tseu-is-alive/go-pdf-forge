@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing vX.Y.Z tag to publish
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve release tag
+        id: target
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          tag="${INPUT_TAG:-${GITHUB_REF#refs/tags/}}"
+          printf '%s' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$' || {
+            echo "::error::invalid release tag: $tag"; exit 1; }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.target.outputs.tag }}
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Install Buf
+        run: go install github.com/bufbuild/buf/cmd/buf@v1.73.0
+
+      - name: Verify tag and source version
+        env:
+          RELEASE_TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          source_version="$(sed -n 's/^[[:space:]]*Version = "\([0-9][0-9.]*\)"/\1/p' internal/version/version.go)"
+          test "$RELEASE_TAG" = "v$source_version" || {
+            echo "::error::tag $RELEASE_TAG does not match source v$source_version"; exit 1; }
+          make release-check
+
+      - name: Build release archive
+        env:
+          RELEASE_TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          version="${RELEASE_TAG#v}"
+          commit="$(git rev-parse --short HEAD)"
+          built="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          directory="go-pdf-forge-${RELEASE_TAG}-linux-amd64"
+          mkdir -p "$directory"
+          CGO_ENABLED=0 go build -trimpath -ldflags "-s -w \
+            -X github.com/lao-tseu-is-alive/go-pdf-forge/internal/version.Commit=$commit \
+            -X github.com/lao-tseu-is-alive/go-pdf-forge/internal/version.Date=$built" \
+            -o "$directory/mail-poc" ./cmd/mail-poc
+          cp README.md CHANGELOG.md LICENSE "$directory/"
+          tar -czf "${directory}.tar.gz" "$directory"
+          sha256sum "${directory}.tar.gz" > SHA256SUMS
+          ./scripts/changelog_section.sh "$version" > release-notes.md
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            go-pdf-forge-*-linux-amd64.tar.gz SHA256SUMS \
+            --verify-tag \
+            --title "go-pdf-forge $RELEASE_TAG" \
+            --notes-file release-notes.md \
+            --prerelease

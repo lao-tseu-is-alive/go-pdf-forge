@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package upload.v1;
+
+// UploadService receives browser-compatible unary chunks and creates a PDF job
+// only after the committed object has passed its integrity checks.
+service UploadService {
+  rpc StartUpload(StartUploadRequest) returns (StartUploadResponse);
+  rpc UploadChunk(UploadChunkRequest) returns (UploadChunkResponse);
+  rpc CommitUpload(CommitUploadRequest) returns (CommitUploadResponse);
+  rpc AbortUpload(AbortUploadRequest) returns (AbortUploadResponse);
+}
+
+message StartUploadRequest {
+  string filename = 1;
+  int64 size = 2;
+  string content_type = 3;
+}
+
+message StartUploadResponse {
+  string upload_id = 1;
+  int32 chunk_size = 2;
+  string expires_at = 3;
+}
+
+message UploadChunkRequest {
+  string upload_id = 1;
+  int32 index = 2;
+  bytes data = 3;
+  string sha256 = 4;
+}
+
+message UploadChunkResponse {
+  int32 index = 1;
+  int64 size = 2;
+  bool already_present = 3;
+  int32 received_chunks = 4;
+  int64 received_bytes = 5;
+}
+
+message CommitUploadRequest {
+  string upload_id = 1;
+  string sha256 = 2;
+  bool notify_email = 3;
+}
+
+message CommitUploadResponse {
+  string job_id = 1;
+}
+
+message AbortUploadRequest {
+  string upload_id = 1;
+}
+
+message AbortUploadResponse {}

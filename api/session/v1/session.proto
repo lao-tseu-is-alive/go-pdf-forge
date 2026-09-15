@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package session.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// SessionService issues anonymous capabilities. The transport must rate-limit
+// this unauthenticated operation by the trusted client IP.
+service SessionService {
+  rpc CreateAnonymousSession(CreateAnonymousSessionRequest) returns (CreateAnonymousSessionResponse) {}
+}
+
+message CreateAnonymousSessionRequest {}
+
+message CreateAnonymousSessionResponse {
+  string session_id = 1;
+  // Opaque bearer capability returned only once and stored hashed server-side.
+  string token = 2;
+  google.protobuf.Timestamp expires_at = 3;
+}

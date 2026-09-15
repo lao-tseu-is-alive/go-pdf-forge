@@ -28,5 +28,14 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
+.idea/
 # .vscode/
+
+# Local build and runtime data
+bin/
+tmp/
+uploads/
+
+# Frontend dependencies and build output
+web/node_modules/
+web/dist/

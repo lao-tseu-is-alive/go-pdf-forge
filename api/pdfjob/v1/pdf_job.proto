@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package pdfjob.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service PdfJobService {
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+  rpc GetJob(GetJobRequest) returns (GetJobResponse);
+  rpc CancelJob(CancelJobRequest) returns (CancelJobResponse);
+  rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
+}
+
+// SSE events and result downloads are intentionally normal authenticated HTTP
+// streaming endpoints rather than Connect RPC methods.
+
+enum JobStatus {
+  JOB_STATUS_UNSPECIFIED = 0;
+  JOB_STATUS_QUEUED = 1;
+  JOB_STATUS_ANALYZING = 2;
+  JOB_STATUS_OPTIMIZING = 3;
+  JOB_STATUS_VALIDATING = 4;
+  JOB_STATUS_COMPLETED = 5;
+  JOB_STATUS_FAILED = 6;
+  JOB_STATUS_CANCELLED = 7;
+  JOB_STATUS_EXPIRED = 8;
+}
+
+enum OwnerKind {
+  OWNER_KIND_UNSPECIFIED = 0;
+  OWNER_KIND_AUTHENTICATED = 1;
+  OWNER_KIND_ANONYMOUS = 2;
+}
+
+message PdfJob {
+  string id = 1;
+  JobStatus status = 2;
+  OwnerKind owner_kind = 3;
+  string original_filename = 4;
+  int64 input_size = 5;
+  int64 output_size = 6;
+  int32 page_count = 7;
+  string selected_profile = 8;
+  int32 progress_percent = 9;
+  string progress_message = 10;
+  bool target_met = 11;
+  bool output_available = 12;
+  string error_code = 13;
+  string error_message = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp started_at = 16;
+  google.protobuf.Timestamp completed_at = 17;
+  google.protobuf.Timestamp expires_at = 18;
+}
+
+message ListJobsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListJobsResponse {
+  repeated PdfJob jobs = 1;
+  string next_page_token = 2;
+}
+
+message GetJobRequest {
+  string job_id = 1;
+}
+
+message GetJobResponse {
+  PdfJob job = 1;
+}
+
+message CancelJobRequest {
+  string job_id = 1;
+}
+
+message CancelJobResponse {
+  PdfJob job = 1;
+}
+
+message DeleteJobRequest {
+  string job_id = 1;
+}
+
+message DeleteJobResponse {}
