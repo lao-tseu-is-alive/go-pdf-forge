@@ -6,6 +6,11 @@ projet utilise le versionnement sémantique.
 
 ## [Unreleased]
 
+### Added
+
+- Roadmap d'implémentation versionnée avec identifiants de tâches stables,
+  critères de sortie par phase et contrôle automatique avant release.
+
 ### À venir
 
 - Repository PostgreSQL avec gestion des leases et reprise des jobs.

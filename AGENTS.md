@@ -4,7 +4,7 @@
 
 Build a Go cloud-native PDF self-service application with a Vue/TypeScript frontend. Users upload PDFs in chunks, processing continues asynchronously with Ghostscript, progress is exposed over authenticated fetch-SSE, and temporary results expire automatically.
 
-Read `docs/brief_go_pdf_self_service_agent.md` and `ARCHITECTURE.md` before making architectural changes.
+Read `docs/brief_go_pdf_self_service_agent.md`, `ARCHITECTURE.md`, and `docs/ROADMAP.md` before making architectural changes. `docs/ROADMAP.md` is the source of truth for implementation order and task status.
 
 ## Repository identity
 
@@ -63,6 +63,7 @@ Reuse ideas and contracts deliberately; do not copy obsolete or unsafe implement
 
 - Keep changes incremental and compiling; write tests with each behavior.
 - `internal/version/version.go` is the release version source of truth. A release updates it, the README current-version banner and a versioned `CHANGELOG.md` section in the same commit.
+- Update `docs/ROADMAP.md` whenever a task starts, completes, changes scope, or changes order. Task IDs are stable and must remain unique.
 - Before a release commit run `make release-prepare`; after committing, `CONFIRM_RELEASE=vX.Y.Z make release` requires a clean `main`, creates an annotated tag and atomically pushes `main` plus the tag. Never bypass `make release-check`.
 - Treat `.proto` files as authoritative and never hand-edit generated files.
 - Prefer `rg`, existing scripts, Make targets, and `uv` for any Python tooling.

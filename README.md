@@ -10,7 +10,8 @@ les fichiers.
 
 Le projet est en construction. Les décisions stabilisées et les limites de
 sécurité sont décrites dans [ARCHITECTURE.md](ARCHITECTURE.md). Le brief source
-se trouve dans [docs/brief_go_pdf_self_service_agent.md](docs/brief_go_pdf_self_service_agent.md).
+se trouve dans [docs/brief_go_pdf_self_service_agent.md](docs/brief_go_pdf_self_service_agent.md)
+et le plan d'action suivi dans [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Prérequis de développement
 

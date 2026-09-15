@@ -7,7 +7,7 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS := -s -w -X $(VERSION_PKG).Commit=$(GIT_COMMIT) -X $(VERSION_PKG).Date=$(BUILD_DATE)
 
-.PHONY: build changelog-check check fmt generate generated-check proto-check release release-check release-prepare scripts-check test version-check vet
+.PHONY: build changelog-check check fmt generate generated-check proto-check release release-check release-prepare roadmap-check scripts-check test version-check vet
 
 generate:
 	$(BUF) generate
@@ -53,7 +53,17 @@ changelog-check:
 scripts-check:
 	bash -n scripts/*.sh
 
-release-check: check generated-check version-check changelog-check scripts-check build
+roadmap-check:
+	@test -f docs/ROADMAP.md || { echo "roadmap-check: docs/ROADMAP.md is missing"; exit 1; }
+	@grep -q "Version suivie : \*\*v$(VERSION)\*\*" docs/ROADMAP.md || { echo "roadmap-check: tracked version does not match v$(VERSION)"; exit 1; }
+	@ids="$$(grep -oE 'GPF-[0-9]{3}' docs/ROADMAP.md)"; \
+		test -n "$$ids" || { echo "roadmap-check: no task IDs found"; exit 1; }; \
+		duplicates="$$(printf '%s\n' "$$ids" | sort | uniq -d)"; \
+		test -z "$$duplicates" || { echo "roadmap-check: duplicate task IDs: $$duplicates"; exit 1; }
+	@grep -q '^## Prochaine action$$' docs/ROADMAP.md || { echo "roadmap-check: missing next-action section"; exit 1; }
+	@echo "roadmap-check: OK"
+
+release-check: check generated-check version-check changelog-check scripts-check roadmap-check build
 	@./bin/mail-poc --version | grep -q "^go-pdf-forge v$(VERSION) (commit $(GIT_COMMIT), built "
 	@echo "release-check: v$(VERSION) OK"
 
