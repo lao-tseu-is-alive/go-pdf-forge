@@ -1,6 +1,6 @@
 # go-pdf-forge
 
-Current version: **v0.0.1** — fondation pré-alpha, le parcours PDF complet est
+Current version: **v0.0.2** — fondation pré-alpha, le parcours PDF complet est
 encore en cours d'implémentation.
 
 Service cloud-native de traitement asynchrone de PDF, écrit en Go, avec une
@@ -79,8 +79,8 @@ versionnée de `CHANGELOG.md` dans le même commit.
 make release-prepare
 git add <fichiers-relus>
 git diff --cached --check
-git commit -m "chore(release): prepare v0.0.1"
-CONFIRM_RELEASE=v0.0.1 make release
+git commit -m "chore(release): prepare v0.0.2"
+CONFIRM_RELEASE=v0.0.2 make release
 ```
 
 La dernière commande exige une branche `main` propre, recrée tous les contrôles,

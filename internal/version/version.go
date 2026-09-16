@@ -6,7 +6,7 @@ import "fmt"
 
 const (
 	Name    = "go-pdf-forge"
-	Version = "0.0.1"
+	Version = "0.0.2"
 )
 
 var (

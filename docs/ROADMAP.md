@@ -1,6 +1,6 @@
 # go-pdf-forge Roadmap
 
-Version suivie : **v0.0.1**.
+Version suivie : **v0.0.2**.
 
 Ce document est la source de vérité pour l'ordre d'implémentation. Les décisions
 stables restent dans `AGENTS.md` et `ARCHITECTURE.md`; le détail historique des

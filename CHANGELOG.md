@@ -6,18 +6,24 @@ projet utilise le versionnement sémantique.
 
 ## [Unreleased]
 
+### À venir
+
+- Sessions anonymes persistantes avec capacités révocables.
+- Repository PostgreSQL avec gestion des leases et reprise des jobs.
+- Stockage multipart Garage/S3 et handlers ConnectRPC.
+- Worker Ghostscript et interface Vue.
+
+## [0.0.2] - 2026-09-16
+
+Cette version ajoute le socle PostgreSQL opérationnel et le suivi versionné de
+la feuille de route.
+
 ### Added
 
 - Roadmap d'implémentation versionnée avec identifiants de tâches stables,
   critères de sortie par phase et contrôle automatique avant release.
 - Socle PostgreSQL `pgxpool` avec limites et timeouts configurables, logs sans
   DSN ni mot de passe, health check borné et migrations embarquées explicites.
-
-### À venir
-
-- Repository PostgreSQL avec gestion des leases et reprise des jobs.
-- Stockage multipart Garage/S3 et handlers ConnectRPC.
-- Worker Ghostscript et interface Vue.
 
 ## [0.0.1] - 2026-09-15
 
@@ -43,5 +49,6 @@ invariants du service ; elle ne fournit pas encore le parcours PDF complet.
 - Garde de release vérifiant la version, le README, le changelog, les tests,
   `go vet`, les contrats Protobuf et la reproductibilité de la génération.
 
-[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.2
 [0.0.1]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.1
