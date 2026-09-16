@@ -18,11 +18,12 @@ versions reste dans `CHANGELOG.md`.
 
 ## Prochaine action
 
-- [ ] **GPF-001 — Socle PostgreSQL/pgx** : connexion validée, timeouts,
-  observabilité non sensible et exécution contrôlée des migrations.
+La prochaine action est la première tâche non cochée de la phase active.
 
 ## Phase 1 — Persistance et file durable
 
+- [x] **GPF-001 — Socle PostgreSQL/pgx** : connexion validée, timeouts,
+  observabilité non sensible et exécution contrôlée des migrations.
 - [ ] **GPF-002 — Sessions anonymes** : créer, retrouver, expirer et révoquer
   une session en ne stockant que le digest de sa capacité.
 - [ ] **GPF-003 — Quotas anonymes** : compteurs PostgreSQL atomiques par session

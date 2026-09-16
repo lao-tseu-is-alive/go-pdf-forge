@@ -45,13 +45,21 @@ type Anonymous struct {
 }
 
 type Database struct {
-	Driver   string
-	Host     string
-	Port     int
-	Name     string
-	User     string
-	Password string
-	SSLMode  string
+	Driver            string
+	Host              string
+	Port              int
+	Name              string
+	User              string
+	Password          string
+	SSLMode           string
+	ConnectTimeout    time.Duration
+	HealthTimeout     time.Duration
+	MigrationTimeout  time.Duration
+	MaxConnections    int
+	MinConnections    int
+	MaxConnectionAge  time.Duration
+	MaxConnectionIdle time.Duration
+	HealthCheckPeriod time.Duration
 }
 
 type ObjectStore struct {
@@ -96,7 +104,7 @@ func Load(lookup LookupEnv) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	databasePort, err := intValue(lookup, "DB_PORT", 5432)
+	database, err := databaseFromEnvironment(lookup)
 	if err != nil {
 		return Config{}, err
 	}
@@ -116,15 +124,7 @@ func Load(lookup LookupEnv) (Config, error) {
 			TokenPepper: []byte(value(lookup, "ANONYMOUS_TOKEN_PEPPER", "")),
 			SessionTTL:  anonymousSessionTTL,
 		},
-		Database: Database{
-			Driver:   value(lookup, "DB_DRIVER", "postgres"),
-			Host:     value(lookup, "DB_HOST", "127.0.0.1"),
-			Port:     databasePort,
-			Name:     value(lookup, "DB_NAME", "go_pdf_forge"),
-			User:     value(lookup, "DB_USER", "go_pdf_forge"),
-			Password: value(lookup, "DB_PASSWORD", ""),
-			SSLMode:  value(lookup, "DB_SSL_MODE", "disable"),
-		},
+		Database: database,
 		ObjectStore: ObjectStore{
 			Endpoint:        value(lookup, "S3_ENDPOINT", "http://127.0.0.1:3900"),
 			Region:          value(lookup, "S3_REGION", "garage"),
@@ -166,27 +166,7 @@ func (cfg Config) Validate() error {
 	if cfg.Anonymous.SessionTTL <= 0 {
 		problems = append(problems, errors.New("ANONYMOUS_SESSION_TTL must be positive"))
 	}
-	if cfg.Database.Driver != "postgres" {
-		problems = append(problems, errors.New("DB_DRIVER must be postgres"))
-	}
-	if strings.TrimSpace(cfg.Database.Host) == "" {
-		problems = append(problems, errors.New("DB_HOST is required"))
-	}
-	if cfg.Database.Port < 1 || cfg.Database.Port > 65535 {
-		problems = append(problems, errors.New("DB_PORT must be between 1 and 65535"))
-	}
-	if strings.TrimSpace(cfg.Database.Name) == "" {
-		problems = append(problems, errors.New("DB_NAME is required"))
-	}
-	if strings.TrimSpace(cfg.Database.User) == "" {
-		problems = append(problems, errors.New("DB_USER is required"))
-	}
-	if cfg.Database.Password == "" {
-		problems = append(problems, errors.New("DB_PASSWORD is required"))
-	}
-	if cfg.Database.SSLMode == "" {
-		problems = append(problems, errors.New("DB_SSL_MODE is required"))
-	}
+	problems = append(problems, cfg.Database.validate()...)
 	endpoint, err := url.Parse(cfg.ObjectStore.Endpoint)
 	if err != nil || endpoint.Scheme == "" || endpoint.Host == "" {
 		problems = append(problems, errors.New("S3_ENDPOINT must be an absolute URL"))
@@ -206,6 +186,145 @@ func (cfg Config) Validate() error {
 		problems = append(problems, errors.New("S3_SECRET_ACCESS_KEY is required"))
 	}
 	return errors.Join(problems...)
+}
+
+// LoadDatabase parses only PostgreSQL settings. Migration and diagnostic
+// binaries use it so they do not require unrelated object-store credentials.
+func LoadDatabase(lookup LookupEnv) (Database, error) {
+	if lookup == nil {
+		return Database{}, errors.New("environment lookup is required")
+	}
+	database, err := databaseFromEnvironment(lookup)
+	if err != nil {
+		return Database{}, err
+	}
+	return database, errors.Join(database.validate()...)
+}
+
+func databaseFromEnvironment(lookup LookupEnv) (Database, error) {
+	port, err := intValue(lookup, "DB_PORT", 5432)
+	if err != nil {
+		return Database{}, err
+	}
+	connectTimeout, err := durationValue(lookup, "DB_CONNECT_TIMEOUT", 5*time.Second)
+	if err != nil {
+		return Database{}, err
+	}
+	healthTimeout, err := durationValue(lookup, "DB_HEALTH_TIMEOUT", 2*time.Second)
+	if err != nil {
+		return Database{}, err
+	}
+	migrationTimeout, err := durationValue(lookup, "DB_MIGRATION_TIMEOUT", 2*time.Minute)
+	if err != nil {
+		return Database{}, err
+	}
+	maxConnections, err := intValue(lookup, "DB_MAX_CONNECTIONS", 10)
+	if err != nil {
+		return Database{}, err
+	}
+	minConnections, err := intValue(lookup, "DB_MIN_CONNECTIONS", 0)
+	if err != nil {
+		return Database{}, err
+	}
+	maxConnectionAge, err := durationValue(lookup, "DB_MAX_CONNECTION_AGE", 30*time.Minute)
+	if err != nil {
+		return Database{}, err
+	}
+	maxConnectionIdle, err := durationValue(lookup, "DB_MAX_CONNECTION_IDLE", 5*time.Minute)
+	if err != nil {
+		return Database{}, err
+	}
+	healthCheckPeriod, err := durationValue(lookup, "DB_HEALTH_CHECK_PERIOD", 30*time.Second)
+	if err != nil {
+		return Database{}, err
+	}
+
+	database := Database{
+		Driver:            value(lookup, "DB_DRIVER", "postgres"),
+		Host:              value(lookup, "DB_HOST", "127.0.0.1"),
+		Port:              port,
+		Name:              value(lookup, "DB_NAME", "go_pdf_forge"),
+		User:              value(lookup, "DB_USER", "go_pdf_forge"),
+		Password:          value(lookup, "DB_PASSWORD", ""),
+		SSLMode:           value(lookup, "DB_SSL_MODE", "disable"),
+		ConnectTimeout:    connectTimeout,
+		HealthTimeout:     healthTimeout,
+		MigrationTimeout:  migrationTimeout,
+		MaxConnections:    maxConnections,
+		MinConnections:    minConnections,
+		MaxConnectionAge:  maxConnectionAge,
+		MaxConnectionIdle: maxConnectionIdle,
+		HealthCheckPeriod: healthCheckPeriod,
+	}
+	return database, nil
+}
+
+func (cfg Database) Validate() error {
+	return errors.Join(cfg.validate()...)
+}
+
+func (cfg Database) validate() []error {
+	var problems []error
+	if cfg.Driver != "postgres" {
+		problems = append(problems, errors.New("DB_DRIVER must be postgres"))
+	}
+	if strings.TrimSpace(cfg.Host) == "" {
+		problems = append(problems, errors.New("DB_HOST is required"))
+	}
+	if cfg.Port < 1 || cfg.Port > 65535 {
+		problems = append(problems, errors.New("DB_PORT must be between 1 and 65535"))
+	}
+	if strings.TrimSpace(cfg.Name) == "" {
+		problems = append(problems, errors.New("DB_NAME is required"))
+	}
+	if strings.TrimSpace(cfg.User) == "" {
+		problems = append(problems, errors.New("DB_USER is required"))
+	}
+	if cfg.Password == "" {
+		problems = append(problems, errors.New("DB_PASSWORD is required"))
+	}
+	if cfg.SSLMode == "" {
+		problems = append(problems, errors.New("DB_SSL_MODE is required"))
+	} else if !validSSLMode(cfg.SSLMode) {
+		problems = append(problems, errors.New("DB_SSL_MODE must be disable, allow, prefer, require, verify-ca, or verify-full"))
+	}
+	if cfg.ConnectTimeout <= 0 {
+		problems = append(problems, errors.New("DB_CONNECT_TIMEOUT must be positive"))
+	}
+	if cfg.HealthTimeout <= 0 {
+		problems = append(problems, errors.New("DB_HEALTH_TIMEOUT must be positive"))
+	}
+	if cfg.MigrationTimeout <= 0 {
+		problems = append(problems, errors.New("DB_MIGRATION_TIMEOUT must be positive"))
+	}
+	if cfg.MaxConnections <= 0 {
+		problems = append(problems, errors.New("DB_MAX_CONNECTIONS must be positive"))
+	}
+	if cfg.MinConnections < 0 {
+		problems = append(problems, errors.New("DB_MIN_CONNECTIONS must not be negative"))
+	}
+	if cfg.MinConnections > cfg.MaxConnections {
+		problems = append(problems, errors.New("DB_MIN_CONNECTIONS must not exceed DB_MAX_CONNECTIONS"))
+	}
+	if cfg.MaxConnectionAge <= 0 {
+		problems = append(problems, errors.New("DB_MAX_CONNECTION_AGE must be positive"))
+	}
+	if cfg.MaxConnectionIdle <= 0 {
+		problems = append(problems, errors.New("DB_MAX_CONNECTION_IDLE must be positive"))
+	}
+	if cfg.HealthCheckPeriod <= 0 {
+		problems = append(problems, errors.New("DB_HEALTH_CHECK_PERIOD must be positive"))
+	}
+	return problems
+}
+
+func validSSLMode(mode string) bool {
+	switch mode {
+	case "disable", "allow", "prefer", "require", "verify-ca", "verify-full":
+		return true
+	default:
+		return false
+	}
 }
 
 func parseAuthMode(raw string) (AuthMode, error) {

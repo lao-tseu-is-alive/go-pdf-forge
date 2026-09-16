@@ -10,6 +10,8 @@ projet utilise le versionnement sémantique.
 
 - Roadmap d'implémentation versionnée avec identifiants de tâches stables,
   critères de sortie par phase et contrôle automatique avant release.
+- Socle PostgreSQL `pgxpool` avec limites et timeouts configurables, logs sans
+  DSN ni mot de passe, health check borné et migrations embarquées explicites.
 
 ### À venir
 

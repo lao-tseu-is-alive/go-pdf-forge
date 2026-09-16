@@ -61,6 +61,10 @@ jobs:
             -X github.com/lao-tseu-is-alive/go-pdf-forge/internal/version.Commit=$commit \
             -X github.com/lao-tseu-is-alive/go-pdf-forge/internal/version.Date=$built" \
             -o "$directory/mail-poc" ./cmd/mail-poc
+          CGO_ENABLED=0 go build -trimpath -ldflags "-s -w \
+            -X github.com/lao-tseu-is-alive/go-pdf-forge/internal/version.Commit=$commit \
+            -X github.com/lao-tseu-is-alive/go-pdf-forge/internal/version.Date=$built" \
+            -o "$directory/pdf-migrate" ./cmd/pdf-migrate
           cp README.md CHANGELOG.md LICENSE "$directory/"
           tar -czf "${directory}.tar.gz" "$directory"
           sha256sum "${directory}.tar.gz" > SHA256SUMS

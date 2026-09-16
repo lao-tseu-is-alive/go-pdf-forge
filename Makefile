@@ -37,6 +37,7 @@ check: proto-check test vet
 build:
 	mkdir -p bin
 	CGO_ENABLED=0 $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o bin/mail-poc ./cmd/mail-poc
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o bin/pdf-migrate ./cmd/pdf-migrate
 
 version-check:
 	@test -n "$(VERSION)" || { echo "version-check: cannot read internal/version/version.go"; exit 1; }
@@ -65,6 +66,7 @@ roadmap-check:
 
 release-check: check generated-check version-check changelog-check scripts-check roadmap-check build
 	@./bin/mail-poc --version | grep -q "^go-pdf-forge v$(VERSION) (commit $(GIT_COMMIT), built "
+	@./bin/pdf-migrate --version | grep -q "^go-pdf-forge v$(VERSION) (commit $(GIT_COMMIT), built "
 	@echo "release-check: v$(VERSION) OK"
 
 release-prepare: release-check

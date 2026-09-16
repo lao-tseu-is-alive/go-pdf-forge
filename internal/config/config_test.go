@@ -36,6 +36,40 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.WorkerConcurrency != 1 {
 		t.Errorf("WorkerConcurrency = %d", cfg.WorkerConcurrency)
 	}
+	if cfg.Database.ConnectTimeout != 5*time.Second || cfg.Database.HealthTimeout != 2*time.Second {
+		t.Errorf("database timeouts = connect %v, health %v", cfg.Database.ConnectTimeout, cfg.Database.HealthTimeout)
+	}
+	if cfg.Database.MigrationTimeout != 2*time.Minute {
+		t.Errorf("database migration timeout = %v", cfg.Database.MigrationTimeout)
+	}
+	if cfg.Database.MaxConnections != 10 || cfg.Database.MinConnections != 0 {
+		t.Errorf("database pool bounds = %d..%d", cfg.Database.MinConnections, cfg.Database.MaxConnections)
+	}
+}
+
+func TestLoadDatabaseDoesNotRequireUnrelatedSecrets(t *testing.T) {
+	t.Parallel()
+
+	database, err := LoadDatabase(mapLookup(map[string]string{"DB_PASSWORD": "database-secret"}))
+	if err != nil {
+		t.Fatalf("LoadDatabase() error = %v", err)
+	}
+	if database.Name != "go_pdf_forge" || database.User != "go_pdf_forge" {
+		t.Errorf("database identity = %s/%s", database.User, database.Name)
+	}
+}
+
+func TestLoadDatabaseValidatesPoolBounds(t *testing.T) {
+	t.Parallel()
+
+	_, err := LoadDatabase(mapLookup(map[string]string{
+		"DB_PASSWORD":        "database-secret",
+		"DB_MAX_CONNECTIONS": "2",
+		"DB_MIN_CONNECTIONS": "3",
+	}))
+	if err == nil || !strings.Contains(err.Error(), "DB_MIN_CONNECTIONS") {
+		t.Fatalf("LoadDatabase() error = %v", err)
+	}
 }
 
 func TestLoadRejectsInvalidValuesWithoutLeakingSecrets(t *testing.T) {

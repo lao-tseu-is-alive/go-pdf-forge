@@ -12,7 +12,7 @@ Read `docs/brief_go_pdf_self_service_agent.md`, `ARCHITECTURE.md`, and `docs/ROA
 - Go module: `github.com/lao-tseu-is-alive/go-pdf-forge`.
 - Backend toolchain: Go 1.27.1, Protobuf, Buf, ConnectRPC, PostgreSQL/pgx.
 - Frontend: Vue 3 and TypeScript.
-- Main binaries: `cmd/pdf-api`, `cmd/pdf-worker`, and diagnostic `cmd/mail-poc`.
+- Main binaries: `cmd/pdf-api`, `cmd/pdf-worker`, diagnostic `cmd/mail-poc`, and explicit schema tool `cmd/pdf-migrate`.
 
 ## Reference repositories
 

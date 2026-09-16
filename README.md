@@ -36,7 +36,17 @@ make release-check  # garde complète avant commit/tag
 ```
 
 Les migrations SQL sont sous `db/migrations`. Elles ne sont pas appliquées par
-`make check`; leur exécution sur une base réelle est une opération explicite.
+`make check` ou au démarrage d'un service. Leur exécution sur une base réelle
+est une opération explicite :
+
+```bash
+go run ./cmd/pdf-migrate --list  # aucune connexion PostgreSQL
+go run ./cmd/pdf-migrate --check # configuration + connexion, sans mutation
+go run ./cmd/pdf-migrate --up    # connexion et mutation explicites
+```
+
+Le runner embarqué sérialise les exécutions, vérifie le checksum de l'historique
+et applique toutes les migrations pendantes dans une transaction.
 
 ## POC SMTP
 
