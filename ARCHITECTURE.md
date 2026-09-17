@@ -41,6 +41,12 @@ An authenticated principal snapshots numeric `user_id`, numeric `external_id`, l
 
 An anonymous session is a 256-bit random capability. `CreateAnonymousSession` returns an opaque token once; the database stores only its HMAC-SHA-256 digest using a deployment secret. Anonymous jobs belong to the session, not merely to a guessable job UUID. If an Authorization header is present but invalid, the request fails instead of falling back to anonymous access.
 
+Session creation and successful authentication also retain only domain-separated
+HMAC digests of canonical client IP addresses. Capability comparison is constant
+time in Go. Expiry is an exclusive timestamp, revocation preserves its first
+timestamp, and the conditional last-seen update prevents a concurrent expiry or
+revocation from authenticating successfully.
+
 Authorization is checked in storage queries as well as service handlers. Authenticated administrators may inspect all jobs; regular employees and anonymous sessions can access only their own jobs.
 
 ## Upload and object storage

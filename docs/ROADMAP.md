@@ -1,6 +1,6 @@
 # go-pdf-forge Roadmap
 
-Version suivie : **v0.0.3**.
+Version suivie : **v0.0.4**.
 
 Ce document est la source de vérité pour l'ordre d'implémentation. Les décisions
 stables restent dans `AGENTS.md` et `ARCHITECTURE.md`; le détail historique des
@@ -19,7 +19,7 @@ versions reste dans `CHANGELOG.md`.
 ## Prochaine action
 
 La prochaine action est la première tâche non cochée de la phase active : les
-sessions anonymes persistantes.
+quotas anonymes atomiques par session et empreinte IP.
 
 ## Qualité transverse
 
@@ -31,7 +31,7 @@ sessions anonymes persistantes.
 
 - [x] **GPF-001 — Socle PostgreSQL/pgx** : connexion validée, timeouts,
   observabilité non sensible et exécution contrôlée des migrations.
-- [ ] **GPF-002 — Sessions anonymes** : créer, retrouver, expirer et révoquer
+- [x] **GPF-002 — Sessions anonymes** : créer, retrouver, expirer et révoquer
   une session en ne stockant que le digest de sa capacité.
 - [ ] **GPF-003 — Quotas anonymes** : compteurs PostgreSQL atomiques par session
   et empreinte IP, avec limites configurables.

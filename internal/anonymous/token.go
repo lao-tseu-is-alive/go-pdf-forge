@@ -11,12 +11,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/netip"
 	"strings"
 )
 
 const (
-	secretBytes = 32
-	pepperBytes = 32
+	secretBytes    = 32
+	pepperBytes    = 32
+	ipDigestDomain = "go-pdf-forge/anonymous-ip/v1\x00"
 )
 
 // Capability is the one-time credential issued for an anonymous session. Raw
@@ -56,6 +58,25 @@ func Parse(raw string, pepper []byte) (sessionID string, digest [sha256.Size]byt
 // Matches compares capability digests in constant time.
 func Matches(actual, expected [sha256.Size]byte) bool {
 	return hmac.Equal(actual[:], expected[:])
+}
+
+// DigestIP returns a deployment-specific HMAC of a canonical client address.
+// IPv4-mapped addresses are normalized so one client cannot acquire distinct
+// quota identities by switching textual representations.
+func DigestIP(pepper []byte, address netip.Addr) ([sha256.Size]byte, error) {
+	var digest [sha256.Size]byte
+	if err := validatePepper(pepper); err != nil {
+		return digest, err
+	}
+	if !address.IsValid() || address.IsUnspecified() {
+		return digest, errors.New("client IP address is required")
+	}
+	address = address.Unmap()
+	mac := hmac.New(sha256.New, pepper)
+	_, _ = mac.Write([]byte(ipDigestDomain))
+	_, _ = mac.Write(address.AsSlice())
+	copy(digest[:], mac.Sum(nil))
+	return digest, nil
 }
 
 func generate(random io.Reader, pepper []byte) (Capability, error) {

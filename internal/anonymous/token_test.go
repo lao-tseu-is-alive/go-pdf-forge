@@ -2,6 +2,7 @@ package anonymous
 
 import (
 	"bytes"
+	"net/netip"
 	"strings"
 	"testing"
 )
@@ -66,5 +67,28 @@ func TestPepperMustBeHighEntropy(t *testing.T) {
 
 	if _, err := Generate([]byte("too-short")); err == nil {
 		t.Fatal("Generate() error = nil")
+	}
+}
+
+func TestDigestIPCanonicalizesIPv4MappedAddress(t *testing.T) {
+	t.Parallel()
+
+	pepper := []byte(strings.Repeat("p", 32))
+	plain, err := DigestIP(pepper, netip.MustParseAddr("192.0.2.10"))
+	if err != nil {
+		t.Fatalf("DigestIP() error = %v", err)
+	}
+	mapped, err := DigestIP(pepper, netip.MustParseAddr("::ffff:192.0.2.10"))
+	if err != nil {
+		t.Fatalf("DigestIP() mapped error = %v", err)
+	}
+	if !Matches(plain, mapped) {
+		t.Fatal("IPv4 and IPv4-mapped forms produced different digests")
+	}
+	if _, err := DigestIP(pepper, netip.Addr{}); err == nil {
+		t.Fatal("DigestIP() accepted an invalid address")
+	}
+	if _, err := DigestIP(pepper, netip.IPv4Unspecified()); err == nil {
+		t.Fatal("DigestIP() accepted an unspecified address")
 	}
 }

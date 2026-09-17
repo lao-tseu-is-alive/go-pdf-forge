@@ -1,6 +1,6 @@
 # Atlas du dépôt go-pdf-forge
 
-Version suivie : **v0.0.3**.
+Version suivie : **v0.0.4**.
 
 Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
 Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
@@ -47,6 +47,7 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 ## Persistance
 
 - `db/migrations/20260915170000_initial.sql` — Schéma PostgreSQL initial des sessions, uploads, jobs, quotas et outbox.
+- `db/migrations/20260917091500_anonymous_session_digest_lengths.sql` — Contraintes garantissant des digests HMAC complets pour les sessions anonymes.
 - `db/migrations/embed.go` — Embarquement typé des migrations SQL dans les binaires Go.
 - `internal/database/database.go` — Ouverture, validation et observation non sensible du pool PostgreSQL.
 - `internal/database/database_test.go` — Tests unitaires de configuration et de cycle de vie du pool.
@@ -57,6 +58,10 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 
 - `internal/anonymous/token.go` — Génération, analyse et comparaison sûre des capacités anonymes.
 - `internal/anonymous/token_test.go` — Tests de sécurité et de validation des capacités anonymes.
+- `internal/anonymous/session.go` — Cycle de vie métier des sessions anonymes persistantes.
+- `internal/anonymous/session_test.go` — Tests de création, authentification, expiration et révocation anonymes.
+- `internal/anonymous/storage_postgres.go` — Repository pgx des sessions anonymes ne manipulant que des digests.
+- `internal/anonymous/storage_postgres_test.go` — Tests des requêtes et erreurs du repository de sessions anonymes.
 - `internal/config/config.go` — Chargement et validation centralisés de la configuration applicative.
 - `internal/config/config_test.go` — Tests des valeurs par défaut et des invariants de configuration.
 - `internal/job/status.go` — Machine d’états et transitions autorisées des jobs PDF.

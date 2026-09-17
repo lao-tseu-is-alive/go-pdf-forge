@@ -6,17 +6,32 @@ projet utilise le versionnement sémantique.
 
 ## [Unreleased]
 
+### À venir
+
+- Repository PostgreSQL avec gestion des leases et reprise des jobs.
+- Stockage multipart Garage/S3 et handlers ConnectRPC.
+- Worker Ghostscript et interface Vue.
+
+## [0.0.4] - 2026-09-17
+
+Cette version livre le cycle de vie persistant et sécurisé des sessions
+anonymes, fondation des futurs quotas et uploads publics.
+
+### Added
+
+- **GPF-002** — Manager de sessions anonymes couvrant création,
+  authentification, expiration exclusive et révocation idempotente.
+- Repository PostgreSQL `pgx` qui ne reçoit ni capacité brute ni adresse IP
+  brute, avec mise à jour conditionnelle empêchant une course avec
+  l'expiration ou la révocation.
+- Digests HMAC-SHA-256 des adresses IP canoniques avec séparation de domaine.
+- Migration append-only imposant des digests de 32 octets, validée sur la base
+  locale avec un smoke test transactionnel intégralement annulé.
+
 ### Fixed
 
 - Les workflows CI et release installent explicitement `ripgrep`, requis par
   les gardes du dépôt sur les runners GitHub Ubuntu.
-
-### À venir
-
-- Sessions anonymes persistantes avec capacités révocables.
-- Repository PostgreSQL avec gestion des leases et reprise des jobs.
-- Stockage multipart Garage/S3 et handlers ConnectRPC.
-- Worker Ghostscript et interface Vue.
 
 ## [0.0.3] - 2026-09-17
 
@@ -77,7 +92,8 @@ invariants du service ; elle ne fournit pas encore le parcours PDF complet.
 - Garde de release vérifiant la version, le README, le changelog, les tests,
   `go vet`, les contrats Protobuf et la reproductibilité de la génération.
 
-[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.4...HEAD
+[0.0.4]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.4
 [0.0.3]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.3
 [0.0.2]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.2
 [0.0.1]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.1
