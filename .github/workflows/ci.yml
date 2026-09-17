@@ -17,6 +17,10 @@ jobs:
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
+      - name: Install repository tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ripgrep
       - name: Install Buf
         run: go install github.com/bufbuild/buf/cmd/buf@v1.73.0
       - run: make release-check

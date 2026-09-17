@@ -6,6 +6,11 @@ projet utilise le versionnement sémantique.
 
 ## [Unreleased]
 
+### Fixed
+
+- Les workflows CI et release installent explicitement `ripgrep`, requis par
+  les gardes du dépôt sur les runners GitHub Ubuntu.
+
 ### À venir
 
 - Sessions anonymes persistantes avec capacités révocables.

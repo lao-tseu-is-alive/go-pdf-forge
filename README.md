@@ -20,6 +20,7 @@ tous les fichiers dans [docs/atlas.md](docs/atlas.md).
 
 - Go 1.27.1
 - Buf
+- ripgrep (`rg`), utilisé par les gardes de format et de documentation
 - PostgreSQL
 - un stockage compatible S3 (Garage en développement)
 - Ghostscript et les outils Poppler (`pdfinfo`, `pdfimages`)
