@@ -7,14 +7,20 @@ import "google/protobuf/timestamp.proto";
 // SessionService issues anonymous capabilities. The transport must rate-limit
 // this unauthenticated operation by the trusted client IP.
 service SessionService {
+  // CreateAnonymousSession returns a bearer capability exactly once.
   rpc CreateAnonymousSession(CreateAnonymousSessionRequest) returns (CreateAnonymousSessionResponse) {}
 }
 
+// CreateAnonymousSessionRequest is intentionally empty; client identity and
+// trusted network metadata come from the HTTP request context.
 message CreateAnonymousSessionRequest {}
 
+// CreateAnonymousSessionResponse contains the newly issued anonymous identity.
 message CreateAnonymousSessionResponse {
+  // session_id is the public UUID used to identify the session.
   string session_id = 1;
   // Opaque bearer capability returned only once and stored hashed server-side.
   string token = 2;
+  // expires_at is the absolute instant after which the capability is rejected.
   google.protobuf.Timestamp expires_at = 3;
 }

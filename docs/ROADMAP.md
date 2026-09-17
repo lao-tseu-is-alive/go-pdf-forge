@@ -1,6 +1,6 @@
 # go-pdf-forge Roadmap
 
-Version suivie : **v0.0.2**.
+Version suivie : **v0.0.3**.
 
 Ce document est la source de vérité pour l'ordre d'implémentation. Les décisions
 stables restent dans `AGENTS.md` et `ARCHITECTURE.md`; le détail historique des
@@ -18,7 +18,14 @@ versions reste dans `CHANGELOG.md`.
 
 ## Prochaine action
 
-La prochaine action est la première tâche non cochée de la phase active.
+La prochaine action est la première tâche non cochée de la phase active : les
+sessions anonymes persistantes.
+
+## Qualité transverse
+
+- [x] **GPF-035 — Assurance qualité documentaire** : documenter les contrats Go
+  et Protobuf, maintenir un atlas exact fichier par fichier et bloquer les
+  dérives via `make docs-check`, la CI et la routine de release.
 
 ## Phase 1 — Persistance et file durable
 

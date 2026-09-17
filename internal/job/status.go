@@ -4,24 +4,36 @@ package job
 
 import "fmt"
 
+// Status is the durable lifecycle state of a PDF processing job.
 type Status string
 
 const (
-	StatusQueued     Status = "queued"
-	StatusAnalyzing  Status = "analyzing"
+	// StatusQueued means the job is durable and available for worker claim.
+	StatusQueued Status = "queued"
+	// StatusAnalyzing means a worker is validating and inspecting the source PDF.
+	StatusAnalyzing Status = "analyzing"
+	// StatusOptimizing means Ghostscript is producing an output candidate.
 	StatusOptimizing Status = "optimizing"
+	// StatusValidating means a worker is validating an optimized candidate.
 	StatusValidating Status = "validating"
-	StatusCompleted  Status = "completed"
-	StatusFailed     Status = "failed"
-	StatusCancelled  Status = "cancelled"
-	StatusExpired    Status = "expired"
+	// StatusCompleted means a valid best-effort result is available.
+	StatusCompleted Status = "completed"
+	// StatusFailed means processing ended with a stable failure.
+	StatusFailed Status = "failed"
+	// StatusCancelled means a requested cancellation reached a safe boundary.
+	StatusCancelled Status = "cancelled"
+	// StatusExpired means retained blobs and metadata are no longer available.
+	StatusExpired Status = "expired"
 )
 
+// Valid reports whether the status belongs to the state machine.
 func (s Status) Valid() bool {
 	_, ok := transitions[s]
 	return ok
 }
 
+// Terminal reports whether processing has stopped. Completed, failed, and
+// cancelled jobs may still transition once more to expired.
 func (s Status) Terminal() bool {
 	switch s {
 	case StatusCompleted, StatusFailed, StatusCancelled, StatusExpired:
@@ -31,6 +43,7 @@ func (s Status) Terminal() bool {
 	}
 }
 
+// CanTransitionTo reports whether next is an allowed direct successor.
 func (s Status) CanTransitionTo(next Status) bool {
 	for _, candidate := range transitions[s] {
 		if candidate == next {
@@ -40,6 +53,7 @@ func (s Status) CanTransitionTo(next Status) bool {
 	return false
 }
 
+// ValidateTransition rejects unknown states and forbidden lifecycle edges.
 func ValidateTransition(current, next Status) error {
 	if !current.Valid() {
 		return fmt.Errorf("invalid current job status %q", current)

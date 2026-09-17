@@ -15,95 +15,133 @@ export const file_pdfjob_v1_pdf_job: GenFile = /*@__PURE__*/
   fileDesc("ChdwZGZqb2IvdjEvcGRmX2pvYi5wcm90bxIJcGRmam9iLnYxIqUECgZQZGZKb2ISCgoCaWQYASABKAkSJAoGc3RhdHVzGAIgASgOMhQucGRmam9iLnYxLkpvYlN0YXR1cxIoCgpvd25lcl9raW5kGAMgASgOMhQucGRmam9iLnYxLk93bmVyS2luZBIZChFvcmlnaW5hbF9maWxlbmFtZRgEIAEoCRISCgppbnB1dF9zaXplGAUgASgDEhMKC291dHB1dF9zaXplGAYgASgDEhIKCnBhZ2VfY291bnQYByABKAUSGAoQc2VsZWN0ZWRfcHJvZmlsZRgIIAEoCRIYChBwcm9ncmVzc19wZXJjZW50GAkgASgFEhgKEHByb2dyZXNzX21lc3NhZ2UYCiABKAkSEgoKdGFyZ2V0X21ldBgLIAEoCBIYChBvdXRwdXRfYXZhaWxhYmxlGAwgASgIEhIKCmVycm9yX2NvZGUYDSABKAkSFQoNZXJyb3JfbWVzc2FnZRgOIAEoCRIuCgpjcmVhdGVkX2F0GA8gASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgpzdGFydGVkX2F0GBAgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIwCgxjb21wbGV0ZWRfYXQYESABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCmV4cGlyZXNfYXQYEiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjgKD0xpc3RKb2JzUmVxdWVzdBIRCglwYWdlX3NpemUYASABKAUSEgoKcGFnZV90b2tlbhgCIAEoCSJMChBMaXN0Sm9ic1Jlc3BvbnNlEh8KBGpvYnMYASADKAsyES5wZGZqb2IudjEuUGRmSm9iEhcKD25leHRfcGFnZV90b2tlbhgCIAEoCSIfCg1HZXRKb2JSZXF1ZXN0Eg4KBmpvYl9pZBgBIAEoCSIwCg5HZXRKb2JSZXNwb25zZRIeCgNqb2IYASABKAsyES5wZGZqb2IudjEuUGRmSm9iIiIKEENhbmNlbEpvYlJlcXVlc3QSDgoGam9iX2lkGAEgASgJIjMKEUNhbmNlbEpvYlJlc3BvbnNlEh4KA2pvYhgBIAEoCzIRLnBkZmpvYi52MS5QZGZKb2IiIgoQRGVsZXRlSm9iUmVxdWVzdBIOCgZqb2JfaWQYASABKAkiEwoRRGVsZXRlSm9iUmVzcG9uc2Uq8QEKCUpvYlN0YXR1cxIaChZKT0JfU1RBVFVTX1VOU1BFQ0lGSUVEEAASFQoRSk9CX1NUQVRVU19RVUVVRUQQARIYChRKT0JfU1RBVFVTX0FOQUxZWklORxACEhkKFUpPQl9TVEFUVVNfT1BUSU1JWklORxADEhkKFUpPQl9TVEFUVVNfVkFMSURBVElORxAEEhgKFEpPQl9TVEFUVVNfQ09NUExFVEVEEAUSFQoRSk9CX1NUQVRVU19GQUlMRUQQBhIYChRKT0JfU1RBVFVTX0NBTkNFTExFRBAHEhYKEkpPQl9TVEFUVVNfRVhQSVJFRBAIKl8KCU93bmVyS2luZBIaChZPV05FUl9LSU5EX1VOU1BFQ0lGSUVEEAASHAoYT1dORVJfS0lORF9BVVRIRU5USUNBVEVEEAESGAoUT1dORVJfS0lORF9BTk9OWU1PVVMQAjKjAgoNUGRmSm9iU2VydmljZRJDCghMaXN0Sm9icxIaLnBkZmpvYi52MS5MaXN0Sm9ic1JlcXVlc3QaGy5wZGZqb2IudjEuTGlzdEpvYnNSZXNwb25zZRI9CgZHZXRKb2ISGC5wZGZqb2IudjEuR2V0Sm9iUmVxdWVzdBoZLnBkZmpvYi52MS5HZXRKb2JSZXNwb25zZRJGCglDYW5jZWxKb2ISGy5wZGZqb2IudjEuQ2FuY2VsSm9iUmVxdWVzdBocLnBkZmpvYi52MS5DYW5jZWxKb2JSZXNwb25zZRJGCglEZWxldGVKb2ISGy5wZGZqb2IudjEuRGVsZXRlSm9iUmVxdWVzdBocLnBkZmpvYi52MS5EZWxldGVKb2JSZXNwb25zZUKmAQoNY29tLnBkZmpvYi52MUILUGRmSm9iUHJvdG9QAVpDZ2l0aHViLmNvbS9sYW8tdHNldS1pcy1hbGl2ZS9nby1wZGYtZm9yZ2UvZ2VuL2dvL3BkZmpvYi92MTtwZGZqb2J2MaICA1BYWKoCCVBkZmpvYi5WMcoCCVBkZmpvYlxWMeICFVBkZmpvYlxWMVxHUEJNZXRhZGF0YeoCClBkZmpvYjo6VjFiBnByb3RvMw", [file_google_protobuf_timestamp]);
 
 /**
+ * PdfJob is an owner-authorized snapshot of durable processing state.
+ *
  * @generated from message pdfjob.v1.PdfJob
  */
 export type PdfJob = Message<"pdfjob.v1.PdfJob"> & {
   /**
+   * id is the public job UUID.
+   *
    * @generated from field: string id = 1;
    */
   id: string;
 
   /**
+   * status is the current durable lifecycle state.
+   *
    * @generated from field: pdfjob.v1.JobStatus status = 2;
    */
   status: JobStatus;
 
   /**
+   * owner_kind identifies the authorization namespace without exposing identity details.
+   *
    * @generated from field: pdfjob.v1.OwnerKind owner_kind = 3;
    */
   ownerKind: OwnerKind;
 
   /**
+   * original_filename is the sanitized display name supplied at upload start.
+   *
    * @generated from field: string original_filename = 4;
    */
   originalFilename: string;
 
   /**
+   * input_size is the verified source-object size in bytes.
+   *
    * @generated from field: int64 input_size = 5;
    */
   inputSize: bigint;
 
   /**
+   * output_size is the selected result size in bytes, or zero before completion.
+   *
    * @generated from field: int64 output_size = 6;
    */
   outputSize: bigint;
 
   /**
+   * page_count is the validated source and result page count.
+   *
    * @generated from field: int32 page_count = 7;
    */
   pageCount: number;
 
   /**
+   * selected_profile names the chosen optimization profile or original passthrough.
+   *
    * @generated from field: string selected_profile = 8;
    */
   selectedProfile: string;
 
   /**
+   * progress_percent is indicative progress from 0 through 100.
+   *
    * @generated from field: int32 progress_percent = 9;
    */
   progressPercent: number;
 
   /**
+   * progress_message is a safe user-facing description without tool output.
+   *
    * @generated from field: string progress_message = 10;
    */
   progressMessage: string;
 
   /**
+   * target_met reports whether the selected output meets the indicative size target.
+   *
    * @generated from field: bool target_met = 11;
    */
   targetMet: boolean;
 
   /**
+   * output_available reports whether an authorized download can currently succeed.
+   *
    * @generated from field: bool output_available = 12;
    */
   outputAvailable: boolean;
 
   /**
+   * error_code is a stable machine-readable terminal failure code.
+   *
    * @generated from field: string error_code = 13;
    */
   errorCode: string;
 
   /**
+   * error_message is a safe user-facing terminal failure explanation.
+   *
    * @generated from field: string error_message = 14;
    */
   errorMessage: string;
 
   /**
+   * created_at is the durable job creation instant.
+   *
    * @generated from field: google.protobuf.Timestamp created_at = 15;
    */
   createdAt?: Timestamp | undefined;
 
   /**
+   * started_at is the first successful worker-claim instant when available.
+   *
    * @generated from field: google.protobuf.Timestamp started_at = 16;
    */
   startedAt?: Timestamp | undefined;
 
   /**
+   * completed_at is the terminal processing instant when available.
+   *
    * @generated from field: google.protobuf.Timestamp completed_at = 17;
    */
   completedAt?: Timestamp | undefined;
 
   /**
+   * expires_at is the scheduled retention deadline.
+   *
    * @generated from field: google.protobuf.Timestamp expires_at = 18;
    */
   expiresAt?: Timestamp | undefined;
@@ -117,15 +155,21 @@ export const PdfJobSchema: GenMessage<PdfJob> = /*@__PURE__*/
   messageDesc(file_pdfjob_v1_pdf_job, 0);
 
 /**
+ * ListJobsRequest controls owner-scoped cursor pagination.
+ *
  * @generated from message pdfjob.v1.ListJobsRequest
  */
 export type ListJobsRequest = Message<"pdfjob.v1.ListJobsRequest"> & {
   /**
+   * page_size is the requested bounded number of jobs.
+   *
    * @generated from field: int32 page_size = 1;
    */
   pageSize: number;
 
   /**
+   * page_token is an opaque cursor returned by an earlier response.
+   *
    * @generated from field: string page_token = 2;
    */
   pageToken: string;
@@ -139,15 +183,21 @@ export const ListJobsRequestSchema: GenMessage<ListJobsRequest> = /*@__PURE__*/
   messageDesc(file_pdfjob_v1_pdf_job, 1);
 
 /**
+ * ListJobsResponse contains one page of visible jobs.
+ *
  * @generated from message pdfjob.v1.ListJobsResponse
  */
 export type ListJobsResponse = Message<"pdfjob.v1.ListJobsResponse"> & {
   /**
+   * jobs are ordered according to the service's stable pagination contract.
+   *
    * @generated from field: repeated pdfjob.v1.PdfJob jobs = 1;
    */
   jobs: PdfJob[];
 
   /**
+   * next_page_token is empty when no later page exists.
+   *
    * @generated from field: string next_page_token = 2;
    */
   nextPageToken: string;
@@ -161,10 +211,14 @@ export const ListJobsResponseSchema: GenMessage<ListJobsResponse> = /*@__PURE__*
   messageDesc(file_pdfjob_v1_pdf_job, 2);
 
 /**
+ * GetJobRequest identifies one job for owner-authorized lookup.
+ *
  * @generated from message pdfjob.v1.GetJobRequest
  */
 export type GetJobRequest = Message<"pdfjob.v1.GetJobRequest"> & {
   /**
+   * job_id is the public job UUID.
+   *
    * @generated from field: string job_id = 1;
    */
   jobId: string;
@@ -178,10 +232,14 @@ export const GetJobRequestSchema: GenMessage<GetJobRequest> = /*@__PURE__*/
   messageDesc(file_pdfjob_v1_pdf_job, 3);
 
 /**
+ * GetJobResponse contains the current authoritative job snapshot.
+ *
  * @generated from message pdfjob.v1.GetJobResponse
  */
 export type GetJobResponse = Message<"pdfjob.v1.GetJobResponse"> & {
   /**
+   * job is the requested owner-authorized job.
+   *
    * @generated from field: pdfjob.v1.PdfJob job = 1;
    */
   job?: PdfJob | undefined;
@@ -195,10 +253,14 @@ export const GetJobResponseSchema: GenMessage<GetJobResponse> = /*@__PURE__*/
   messageDesc(file_pdfjob_v1_pdf_job, 4);
 
 /**
+ * CancelJobRequest identifies one non-terminal job to cancel.
+ *
  * @generated from message pdfjob.v1.CancelJobRequest
  */
 export type CancelJobRequest = Message<"pdfjob.v1.CancelJobRequest"> & {
   /**
+   * job_id is the public job UUID.
+   *
    * @generated from field: string job_id = 1;
    */
   jobId: string;
@@ -212,10 +274,14 @@ export const CancelJobRequestSchema: GenMessage<CancelJobRequest> = /*@__PURE__*
   messageDesc(file_pdfjob_v1_pdf_job, 5);
 
 /**
+ * CancelJobResponse contains the state after recording cancellation.
+ *
  * @generated from message pdfjob.v1.CancelJobResponse
  */
 export type CancelJobResponse = Message<"pdfjob.v1.CancelJobResponse"> & {
   /**
+   * job is the updated owner-authorized job snapshot.
+   *
    * @generated from field: pdfjob.v1.PdfJob job = 1;
    */
   job?: PdfJob | undefined;
@@ -229,10 +295,14 @@ export const CancelJobResponseSchema: GenMessage<CancelJobResponse> = /*@__PURE_
   messageDesc(file_pdfjob_v1_pdf_job, 6);
 
 /**
+ * DeleteJobRequest identifies retained job data to remove or expire.
+ *
  * @generated from message pdfjob.v1.DeleteJobRequest
  */
 export type DeleteJobRequest = Message<"pdfjob.v1.DeleteJobRequest"> & {
   /**
+   * job_id is the public job UUID.
+   *
    * @generated from field: string job_id = 1;
    */
   jobId: string;
@@ -246,6 +316,8 @@ export const DeleteJobRequestSchema: GenMessage<DeleteJobRequest> = /*@__PURE__*
   messageDesc(file_pdfjob_v1_pdf_job, 7);
 
 /**
+ * DeleteJobResponse confirms idempotent deletion or expiry.
+ *
  * @generated from message pdfjob.v1.DeleteJobResponse
  */
 export type DeleteJobResponse = Message<"pdfjob.v1.DeleteJobResponse"> & {
@@ -259,50 +331,70 @@ export const DeleteJobResponseSchema: GenMessage<DeleteJobResponse> = /*@__PURE_
   messageDesc(file_pdfjob_v1_pdf_job, 8);
 
 /**
+ * JobStatus is the externally visible durable processing state.
+ *
  * @generated from enum pdfjob.v1.JobStatus
  */
 export enum JobStatus {
   /**
+   * JOB_STATUS_UNSPECIFIED represents an absent or unknown status.
+   *
    * @generated from enum value: JOB_STATUS_UNSPECIFIED = 0;
    */
   UNSPECIFIED = 0,
 
   /**
+   * JOB_STATUS_QUEUED means the job is available for worker claim.
+   *
    * @generated from enum value: JOB_STATUS_QUEUED = 1;
    */
   QUEUED = 1,
 
   /**
+   * JOB_STATUS_ANALYZING means the source PDF is being inspected.
+   *
    * @generated from enum value: JOB_STATUS_ANALYZING = 2;
    */
   ANALYZING = 2,
 
   /**
+   * JOB_STATUS_OPTIMIZING means an output candidate is being produced.
+   *
    * @generated from enum value: JOB_STATUS_OPTIMIZING = 3;
    */
   OPTIMIZING = 3,
 
   /**
+   * JOB_STATUS_VALIDATING means an output candidate is being verified.
+   *
    * @generated from enum value: JOB_STATUS_VALIDATING = 4;
    */
   VALIDATING = 4,
 
   /**
+   * JOB_STATUS_COMPLETED means a valid best-effort output is available.
+   *
    * @generated from enum value: JOB_STATUS_COMPLETED = 5;
    */
   COMPLETED = 5,
 
   /**
+   * JOB_STATUS_FAILED means processing ended with a stable error.
+   *
    * @generated from enum value: JOB_STATUS_FAILED = 6;
    */
   FAILED = 6,
 
   /**
+   * JOB_STATUS_CANCELLED means cooperative cancellation completed.
+   *
    * @generated from enum value: JOB_STATUS_CANCELLED = 7;
    */
   CANCELLED = 7,
 
   /**
+   * JOB_STATUS_EXPIRED means retained data is no longer available.
+   *
    * @generated from enum value: JOB_STATUS_EXPIRED = 8;
    */
   EXPIRED = 8,
@@ -315,20 +407,28 @@ export const JobStatusSchema: GenEnum<JobStatus> = /*@__PURE__*/
   enumDesc(file_pdfjob_v1_pdf_job, 0);
 
 /**
+ * OwnerKind identifies which authorization namespace owns a job.
+ *
  * @generated from enum pdfjob.v1.OwnerKind
  */
 export enum OwnerKind {
   /**
+   * OWNER_KIND_UNSPECIFIED represents an absent or unknown owner kind.
+   *
    * @generated from enum value: OWNER_KIND_UNSPECIFIED = 0;
    */
   UNSPECIFIED = 0,
 
   /**
+   * OWNER_KIND_AUTHENTICATED belongs to a validated employee identity.
+   *
    * @generated from enum value: OWNER_KIND_AUTHENTICATED = 1;
    */
   AUTHENTICATED = 1,
 
   /**
+   * OWNER_KIND_ANONYMOUS belongs to an anonymous capability session.
+   *
    * @generated from enum value: OWNER_KIND_ANONYMOUS = 2;
    */
   ANONYMOUS = 2,
@@ -341,10 +441,14 @@ export const OwnerKindSchema: GenEnum<OwnerKind> = /*@__PURE__*/
   enumDesc(file_pdfjob_v1_pdf_job, 1);
 
 /**
+ * PdfJobService exposes owner-scoped durable job lifecycle operations.
+ *
  * @generated from service pdfjob.v1.PdfJobService
  */
 export const PdfJobService: GenService<{
   /**
+   * ListJobs returns a page of jobs visible to the current owner.
+   *
    * @generated from rpc pdfjob.v1.PdfJobService.ListJobs
    */
   listJobs: {
@@ -353,6 +457,8 @@ export const PdfJobService: GenService<{
     output: typeof ListJobsResponseSchema;
   },
   /**
+   * GetJob returns one owner-authorized job snapshot.
+   *
    * @generated from rpc pdfjob.v1.PdfJobService.GetJob
    */
   getJob: {
@@ -361,6 +467,8 @@ export const PdfJobService: GenService<{
     output: typeof GetJobResponseSchema;
   },
   /**
+   * CancelJob requests cooperative cancellation of a non-terminal job.
+   *
    * @generated from rpc pdfjob.v1.PdfJobService.CancelJob
    */
   cancelJob: {
@@ -369,6 +477,8 @@ export const PdfJobService: GenService<{
     output: typeof CancelJobResponseSchema;
   },
   /**
+   * DeleteJob removes or expires caller-owned retained job data idempotently.
+   *
    * @generated from rpc pdfjob.v1.PdfJobService.DeleteJob
    */
   deleteJob: {

@@ -7,14 +7,19 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS := -s -w -X $(VERSION_PKG).Commit=$(GIT_COMMIT) -X $(VERSION_PKG).Date=$(BUILD_DATE)
 
-.PHONY: build changelog-check check fmt generate generated-check proto-check release release-check release-prepare release-traceability-check roadmap-check scripts-check test version-check vet
+.PHONY: atlas-check build changelog-check check docs-assert docs-check fmt generate generated-check godoc-check proto-check release release-check release-prepare release-traceability-check roadmap-check scripts-check test version-check vet
 
 generate:
 	$(BUF) generate
 
 generated-check:
-	$(BUF) generate
-	@git diff --exit-code -- gen/go web/src/gen
+	@snapshot="$$(mktemp -d)"; \
+		trap 'rm -rf "$$snapshot"' EXIT; \
+		cp -a gen/go "$$snapshot/gen-go"; \
+		cp -a web/src/gen "$$snapshot/web-gen"; \
+		$(BUF) generate; \
+		diff -ru "$$snapshot/gen-go" gen/go; \
+		diff -ru "$$snapshot/web-gen" web/src/gen
 
 fmt:
 	$(BUF) format -w
@@ -30,7 +35,18 @@ test:
 vet:
 	$(GO) vet ./...
 
-check: proto-check test vet
+godoc-check:
+	$(GO) run ./cmd/doccheck --scope go
+
+atlas-check:
+	$(GO) run ./cmd/doccheck --scope atlas
+
+docs-assert:
+	bash scripts/check_documentation_claims.sh
+
+docs-check: godoc-check atlas-check docs-assert
+
+check: proto-check test vet docs-check
 	@test -z "$$(gofmt -l $$(rg --files -g '*.go'))"
 	@git diff --check
 

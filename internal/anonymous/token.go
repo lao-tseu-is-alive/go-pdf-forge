@@ -19,16 +19,25 @@ const (
 	pepperBytes = 32
 )
 
+// Capability is the one-time credential issued for an anonymous session. Raw
+// belongs only to the client; persistence layers store Digest instead.
 type Capability struct {
+	// SessionID is the public UUID embedded in Raw and used for indexed lookup.
 	SessionID string
-	Raw       string
-	Digest    [sha256.Size]byte
+	// Raw is the bearer credential returned once to the client and never logged.
+	Raw string
+	// Digest is the HMAC-SHA-256 value safe to persist instead of Raw.
+	Digest [sha256.Size]byte
 }
 
+// Generate creates a session UUID and a 256-bit secret using crypto/rand, then
+// derives the digest that the server persists.
 func Generate(pepper []byte) (Capability, error) {
 	return generate(rand.Reader, pepper)
 }
 
+// Parse validates a raw capability, returns its embedded session UUID, and
+// derives the digest used for constant-time comparison with persisted state.
 func Parse(raw string, pepper []byte) (sessionID string, digest [sha256.Size]byte, err error) {
 	if err := validatePepper(pepper); err != nil {
 		return "", digest, err
@@ -44,6 +53,7 @@ func Parse(raw string, pepper []byte) (sessionID string, digest [sha256.Size]byt
 	return sessionID, tokenDigest(pepper, secret), nil
 }
 
+// Matches compares capability digests in constant time.
 func Matches(actual, expected [sha256.Size]byte) bool {
 	return hmac.Equal(actual[:], expected[:])
 }

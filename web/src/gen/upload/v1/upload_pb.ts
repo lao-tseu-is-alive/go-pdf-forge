@@ -13,20 +13,28 @@ export const file_upload_v1_upload: GenFile = /*@__PURE__*/
   fileDesc("ChZ1cGxvYWQvdjEvdXBsb2FkLnByb3RvEgl1cGxvYWQudjEiSgoSU3RhcnRVcGxvYWRSZXF1ZXN0EhAKCGZpbGVuYW1lGAEgASgJEgwKBHNpemUYAiABKAMSFAoMY29udGVudF90eXBlGAMgASgJIlAKE1N0YXJ0VXBsb2FkUmVzcG9uc2USEQoJdXBsb2FkX2lkGAEgASgJEhIKCmNodW5rX3NpemUYAiABKAUSEgoKZXhwaXJlc19hdBgDIAEoCSJUChJVcGxvYWRDaHVua1JlcXVlc3QSEQoJdXBsb2FkX2lkGAEgASgJEg0KBWluZGV4GAIgASgFEgwKBGRhdGEYAyABKAwSDgoGc2hhMjU2GAQgASgJInwKE1VwbG9hZENodW5rUmVzcG9uc2USDQoFaW5kZXgYASABKAUSDAoEc2l6ZRgCIAEoAxIXCg9hbHJlYWR5X3ByZXNlbnQYAyABKAgSFwoPcmVjZWl2ZWRfY2h1bmtzGAQgASgFEhYKDnJlY2VpdmVkX2J5dGVzGAUgASgDIk4KE0NvbW1pdFVwbG9hZFJlcXVlc3QSEQoJdXBsb2FkX2lkGAEgASgJEg4KBnNoYTI1NhgCIAEoCRIUCgxub3RpZnlfZW1haWwYAyABKAgiJgoUQ29tbWl0VXBsb2FkUmVzcG9uc2USDgoGam9iX2lkGAEgASgJIicKEkFib3J0VXBsb2FkUmVxdWVzdBIRCgl1cGxvYWRfaWQYASABKAkiFQoTQWJvcnRVcGxvYWRSZXNwb25zZTLKAgoNVXBsb2FkU2VydmljZRJMCgtTdGFydFVwbG9hZBIdLnVwbG9hZC52MS5TdGFydFVwbG9hZFJlcXVlc3QaHi51cGxvYWQudjEuU3RhcnRVcGxvYWRSZXNwb25zZRJMCgtVcGxvYWRDaHVuaxIdLnVwbG9hZC52MS5VcGxvYWRDaHVua1JlcXVlc3QaHi51cGxvYWQudjEuVXBsb2FkQ2h1bmtSZXNwb25zZRJPCgxDb21taXRVcGxvYWQSHi51cGxvYWQudjEuQ29tbWl0VXBsb2FkUmVxdWVzdBofLnVwbG9hZC52MS5Db21taXRVcGxvYWRSZXNwb25zZRJMCgtBYm9ydFVwbG9hZBIdLnVwbG9hZC52MS5BYm9ydFVwbG9hZFJlcXVlc3QaHi51cGxvYWQudjEuQWJvcnRVcGxvYWRSZXNwb25zZUKmAQoNY29tLnVwbG9hZC52MUILVXBsb2FkUHJvdG9QAVpDZ2l0aHViLmNvbS9sYW8tdHNldS1pcy1hbGl2ZS9nby1wZGYtZm9yZ2UvZ2VuL2dvL3VwbG9hZC92MTt1cGxvYWR2MaICA1VYWKoCCVVwbG9hZC5WMcoCCVVwbG9hZFxWMeICFVVwbG9hZFxWMVxHUEJNZXRhZGF0YeoCClVwbG9hZDo6VjFiBnByb3RvMw");
 
 /**
+ * StartUploadRequest declares immutable metadata for a source PDF.
+ *
  * @generated from message upload.v1.StartUploadRequest
  */
 export type StartUploadRequest = Message<"upload.v1.StartUploadRequest"> & {
   /**
+   * filename is the display name supplied by the browser, not a filesystem path.
+   *
    * @generated from field: string filename = 1;
    */
   filename: string;
 
   /**
+   * size is the complete source size in bytes.
+   *
    * @generated from field: int64 size = 2;
    */
   size: bigint;
 
   /**
+   * content_type is the browser-declared media type and is not trusted alone.
+   *
    * @generated from field: string content_type = 3;
    */
   contentType: string;
@@ -40,20 +48,28 @@ export const StartUploadRequestSchema: GenMessage<StartUploadRequest> = /*@__PUR
   messageDesc(file_upload_v1_upload, 0);
 
 /**
+ * StartUploadResponse gives the client the server-selected upload parameters.
+ *
  * @generated from message upload.v1.StartUploadResponse
  */
 export type StartUploadResponse = Message<"upload.v1.StartUploadResponse"> & {
   /**
+   * upload_id identifies the resumable upload session.
+   *
    * @generated from field: string upload_id = 1;
    */
   uploadId: string;
 
   /**
+   * chunk_size is the required size in bytes for every non-final chunk.
+   *
    * @generated from field: int32 chunk_size = 2;
    */
   chunkSize: number;
 
   /**
+   * expires_at is the RFC 3339 upload-session expiry instant.
+   *
    * @generated from field: string expires_at = 3;
    */
   expiresAt: string;
@@ -67,25 +83,35 @@ export const StartUploadResponseSchema: GenMessage<StartUploadResponse> = /*@__P
   messageDesc(file_upload_v1_upload, 1);
 
 /**
+ * UploadChunkRequest carries one bounded source-PDF chunk.
+ *
  * @generated from message upload.v1.UploadChunkRequest
  */
 export type UploadChunkRequest = Message<"upload.v1.UploadChunkRequest"> & {
   /**
+   * upload_id identifies the upload session that owns this chunk.
+   *
    * @generated from field: string upload_id = 1;
    */
   uploadId: string;
 
   /**
+   * index is the zero-based contiguous chunk position.
+   *
    * @generated from field: int32 index = 2;
    */
   index: number;
 
   /**
+   * data contains the chunk bytes and is bounded by the configured chunk size.
+   *
    * @generated from field: bytes data = 3;
    */
   data: Uint8Array;
 
   /**
+   * sha256 is the lowercase hexadecimal digest of data.
+   *
    * @generated from field: string sha256 = 4;
    */
   sha256: string;
@@ -99,30 +125,42 @@ export const UploadChunkRequestSchema: GenMessage<UploadChunkRequest> = /*@__PUR
   messageDesc(file_upload_v1_upload, 2);
 
 /**
+ * UploadChunkResponse reports durable upload progress.
+ *
  * @generated from message upload.v1.UploadChunkResponse
  */
 export type UploadChunkResponse = Message<"upload.v1.UploadChunkResponse"> & {
   /**
+   * index echoes the accepted chunk position.
+   *
    * @generated from field: int32 index = 1;
    */
   index: number;
 
   /**
+   * size is the accepted chunk size in bytes.
+   *
    * @generated from field: int64 size = 2;
    */
   size: bigint;
 
   /**
+   * already_present is true when an identical idempotent retry was accepted.
+   *
    * @generated from field: bool already_present = 3;
    */
   alreadyPresent: boolean;
 
   /**
+   * received_chunks is the number of distinct chunks recorded so far.
+   *
    * @generated from field: int32 received_chunks = 4;
    */
   receivedChunks: number;
 
   /**
+   * received_bytes is the sum of distinct recorded chunk sizes.
+   *
    * @generated from field: int64 received_bytes = 5;
    */
   receivedBytes: bigint;
@@ -136,20 +174,29 @@ export const UploadChunkResponseSchema: GenMessage<UploadChunkResponse> = /*@__P
   messageDesc(file_upload_v1_upload, 3);
 
 /**
+ * CommitUploadRequest supplies the expected complete-object digest and options.
+ *
  * @generated from message upload.v1.CommitUploadRequest
  */
 export type CommitUploadRequest = Message<"upload.v1.CommitUploadRequest"> & {
   /**
+   * upload_id identifies the upload session to finalize.
+   *
    * @generated from field: string upload_id = 1;
    */
   uploadId: string;
 
   /**
+   * sha256 is the lowercase hexadecimal digest expected for the complete PDF.
+   *
    * @generated from field: string sha256 = 2;
    */
   sha256: string;
 
   /**
+   * notify_email requests authenticated-user notification; anonymous sessions
+   * are never allowed to enable it.
+   *
    * @generated from field: bool notify_email = 3;
    */
   notifyEmail: boolean;
@@ -163,10 +210,14 @@ export const CommitUploadRequestSchema: GenMessage<CommitUploadRequest> = /*@__P
   messageDesc(file_upload_v1_upload, 4);
 
 /**
+ * CommitUploadResponse identifies the durable job created after verification.
+ *
  * @generated from message upload.v1.CommitUploadResponse
  */
 export type CommitUploadResponse = Message<"upload.v1.CommitUploadResponse"> & {
   /**
+   * job_id identifies the queued PDF processing job.
+   *
    * @generated from field: string job_id = 1;
    */
   jobId: string;
@@ -180,10 +231,14 @@ export const CommitUploadResponseSchema: GenMessage<CommitUploadResponse> = /*@_
   messageDesc(file_upload_v1_upload, 5);
 
 /**
+ * AbortUploadRequest identifies an incomplete upload to abandon.
+ *
  * @generated from message upload.v1.AbortUploadRequest
  */
 export type AbortUploadRequest = Message<"upload.v1.AbortUploadRequest"> & {
   /**
+   * upload_id identifies the caller-owned upload session.
+   *
    * @generated from field: string upload_id = 1;
    */
   uploadId: string;
@@ -197,6 +252,8 @@ export const AbortUploadRequestSchema: GenMessage<AbortUploadRequest> = /*@__PUR
   messageDesc(file_upload_v1_upload, 6);
 
 /**
+ * AbortUploadResponse confirms idempotent upload abandonment.
+ *
  * @generated from message upload.v1.AbortUploadResponse
  */
 export type AbortUploadResponse = Message<"upload.v1.AbortUploadResponse"> & {
@@ -217,6 +274,8 @@ export const AbortUploadResponseSchema: GenMessage<AbortUploadResponse> = /*@__P
  */
 export const UploadService: GenService<{
   /**
+   * StartUpload validates metadata and opens a resumable upload session.
+   *
    * @generated from rpc upload.v1.UploadService.StartUpload
    */
   startUpload: {
@@ -225,6 +284,8 @@ export const UploadService: GenService<{
     output: typeof StartUploadResponseSchema;
   },
   /**
+   * UploadChunk idempotently records one integrity-protected chunk.
+   *
    * @generated from rpc upload.v1.UploadService.UploadChunk
    */
   uploadChunk: {
@@ -233,6 +294,8 @@ export const UploadService: GenService<{
     output: typeof UploadChunkResponseSchema;
   },
   /**
+   * CommitUpload verifies the complete object and creates a durable PDF job.
+   *
    * @generated from rpc upload.v1.UploadService.CommitUpload
    */
   commitUpload: {
@@ -241,6 +304,8 @@ export const UploadService: GenService<{
     output: typeof CommitUploadResponseSchema;
   },
   /**
+   * AbortUpload abandons an incomplete upload and its temporary object state.
+   *
    * @generated from rpc upload.v1.UploadService.AbortUpload
    */
   abortUpload: {

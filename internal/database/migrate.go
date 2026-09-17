@@ -29,19 +29,28 @@ const (
 
 var migrationFilename = regexp.MustCompile(`^([0-9]{14})_([a-z0-9][a-z0-9_]*)\.sql$`)
 
+// Migration is one immutable, ordered SQL change loaded from an embedded file.
 type Migration struct {
-	Version  string
-	Name     string
-	UpSQL    string
-	DownSQL  string
+	// Version is the fourteen-digit UTC timestamp prefix from the filename.
+	Version string
+	// Name is the stable descriptive suffix from the filename.
+	Name string
+	// UpSQL advances the schema and may contain multiple trusted statements.
+	UpSQL string
+	// DownSQL documents how to reverse the change for controlled test use.
+	DownSQL string
+	// Checksum fingerprints the complete source file, including both directions.
 	Checksum [sha256.Size]byte
 }
 
+// ChecksumHex returns the migration checksum in lowercase hexadecimal form.
 func (migration Migration) ChecksumHex() string {
 	return hex.EncodeToString(migration.Checksum[:])
 }
 
+// MigrationResult reports migrations committed by one Up invocation.
 type MigrationResult struct {
+	// Applied is ordered from the oldest to the newest committed migration.
 	Applied []Migration
 }
 
@@ -49,11 +58,15 @@ type beginner interface {
 	Begin(context.Context) (pgx.Tx, error)
 }
 
+// Migrator validates immutable migration history and applies pending changes.
+// It is safe to run concurrently across processes because Up takes a
+// transaction-scoped PostgreSQL advisory lock.
 type Migrator struct {
 	migrations []Migration
 	logger     *slog.Logger
 }
 
+// NewMigrator loads and validates every SQL migration in directory.
 func NewMigrator(source fs.FS, directory string, logger *slog.Logger) (*Migrator, error) {
 	migrations, err := LoadMigrations(source, directory)
 	if err != nil {
@@ -65,6 +78,7 @@ func NewMigrator(source fs.FS, directory string, logger *slog.Logger) (*Migrator
 	return &Migrator{migrations: migrations, logger: logger}, nil
 }
 
+// Migrations returns a defensive copy of the ordered migration set.
 func (migrator *Migrator) Migrations() []Migration {
 	result := make([]Migration, len(migrator.migrations))
 	copy(result, migrator.migrations)
@@ -172,6 +186,8 @@ func readAppliedMigrations(ctx context.Context, tx pgx.Tx) (map[string]appliedMi
 	return applied, nil
 }
 
+// LoadMigrations parses, validates, fingerprints, and orders SQL migration
+// files. It rejects malformed names, duplicate versions, and missing sections.
 func LoadMigrations(source fs.FS, directory string) ([]Migration, error) {
 	if source == nil {
 		return nil, errors.New("migration source is required")

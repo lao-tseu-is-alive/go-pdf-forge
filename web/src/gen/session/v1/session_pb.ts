@@ -15,6 +15,9 @@ export const file_session_v1_session: GenFile = /*@__PURE__*/
   fileDesc("ChhzZXNzaW9uL3YxL3Nlc3Npb24ucHJvdG8SCnNlc3Npb24udjEiHwodQ3JlYXRlQW5vbnltb3VzU2Vzc2lvblJlcXVlc3QicwoeQ3JlYXRlQW5vbnltb3VzU2Vzc2lvblJlc3BvbnNlEhIKCnNlc3Npb25faWQYASABKAkSDQoFdG9rZW4YAiABKAkSLgoKZXhwaXJlc19hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAygwEKDlNlc3Npb25TZXJ2aWNlEnEKFkNyZWF0ZUFub255bW91c1Nlc3Npb24SKS5zZXNzaW9uLnYxLkNyZWF0ZUFub255bW91c1Nlc3Npb25SZXF1ZXN0Giouc2Vzc2lvbi52MS5DcmVhdGVBbm9ueW1vdXNTZXNzaW9uUmVzcG9uc2UiAEKuAQoOY29tLnNlc3Npb24udjFCDFNlc3Npb25Qcm90b1ABWkVnaXRodWIuY29tL2xhby10c2V1LWlzLWFsaXZlL2dvLXBkZi1mb3JnZS9nZW4vZ28vc2Vzc2lvbi92MTtzZXNzaW9udjGiAgNTWFiqAgpTZXNzaW9uLlYxygIKU2Vzc2lvblxWMeICFlNlc3Npb25cVjFcR1BCTWV0YWRhdGHqAgtTZXNzaW9uOjpWMWIGcHJvdG8z", [file_google_protobuf_timestamp]);
 
 /**
+ * CreateAnonymousSessionRequest is intentionally empty; client identity and
+ * trusted network metadata come from the HTTP request context.
+ *
  * @generated from message session.v1.CreateAnonymousSessionRequest
  */
 export type CreateAnonymousSessionRequest = Message<"session.v1.CreateAnonymousSessionRequest"> & {
@@ -28,10 +31,14 @@ export const CreateAnonymousSessionRequestSchema: GenMessage<CreateAnonymousSess
   messageDesc(file_session_v1_session, 0);
 
 /**
+ * CreateAnonymousSessionResponse contains the newly issued anonymous identity.
+ *
  * @generated from message session.v1.CreateAnonymousSessionResponse
  */
 export type CreateAnonymousSessionResponse = Message<"session.v1.CreateAnonymousSessionResponse"> & {
   /**
+   * session_id is the public UUID used to identify the session.
+   *
    * @generated from field: string session_id = 1;
    */
   sessionId: string;
@@ -44,6 +51,8 @@ export type CreateAnonymousSessionResponse = Message<"session.v1.CreateAnonymous
   token: string;
 
   /**
+   * expires_at is the absolute instant after which the capability is rejected.
+   *
    * @generated from field: google.protobuf.Timestamp expires_at = 3;
    */
   expiresAt?: Timestamp | undefined;
@@ -64,6 +73,8 @@ export const CreateAnonymousSessionResponseSchema: GenMessage<CreateAnonymousSes
  */
 export const SessionService: GenService<{
   /**
+   * CreateAnonymousSession returns a bearer capability exactly once.
+   *
    * @generated from rpc session.v1.SessionService.CreateAnonymousSession
    */
   createAnonymousSession: {

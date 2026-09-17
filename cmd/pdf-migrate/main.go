@@ -1,3 +1,4 @@
+// Command pdf-migrate lists, checks, and explicitly applies embedded migrations.
 package main
 
 import (

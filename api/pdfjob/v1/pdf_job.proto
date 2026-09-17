@@ -4,83 +4,138 @@ package pdfjob.v1;
 
 import "google/protobuf/timestamp.proto";
 
+// PdfJobService exposes owner-scoped durable job lifecycle operations.
 service PdfJobService {
+  // ListJobs returns a page of jobs visible to the current owner.
   rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+  // GetJob returns one owner-authorized job snapshot.
   rpc GetJob(GetJobRequest) returns (GetJobResponse);
+  // CancelJob requests cooperative cancellation of a non-terminal job.
   rpc CancelJob(CancelJobRequest) returns (CancelJobResponse);
+  // DeleteJob removes or expires caller-owned retained job data idempotently.
   rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
 }
 
 // SSE events and result downloads are intentionally normal authenticated HTTP
 // streaming endpoints rather than Connect RPC methods.
 
+// JobStatus is the externally visible durable processing state.
 enum JobStatus {
+  // JOB_STATUS_UNSPECIFIED represents an absent or unknown status.
   JOB_STATUS_UNSPECIFIED = 0;
+  // JOB_STATUS_QUEUED means the job is available for worker claim.
   JOB_STATUS_QUEUED = 1;
+  // JOB_STATUS_ANALYZING means the source PDF is being inspected.
   JOB_STATUS_ANALYZING = 2;
+  // JOB_STATUS_OPTIMIZING means an output candidate is being produced.
   JOB_STATUS_OPTIMIZING = 3;
+  // JOB_STATUS_VALIDATING means an output candidate is being verified.
   JOB_STATUS_VALIDATING = 4;
+  // JOB_STATUS_COMPLETED means a valid best-effort output is available.
   JOB_STATUS_COMPLETED = 5;
+  // JOB_STATUS_FAILED means processing ended with a stable error.
   JOB_STATUS_FAILED = 6;
+  // JOB_STATUS_CANCELLED means cooperative cancellation completed.
   JOB_STATUS_CANCELLED = 7;
+  // JOB_STATUS_EXPIRED means retained data is no longer available.
   JOB_STATUS_EXPIRED = 8;
 }
 
+// OwnerKind identifies which authorization namespace owns a job.
 enum OwnerKind {
+  // OWNER_KIND_UNSPECIFIED represents an absent or unknown owner kind.
   OWNER_KIND_UNSPECIFIED = 0;
+  // OWNER_KIND_AUTHENTICATED belongs to a validated employee identity.
   OWNER_KIND_AUTHENTICATED = 1;
+  // OWNER_KIND_ANONYMOUS belongs to an anonymous capability session.
   OWNER_KIND_ANONYMOUS = 2;
 }
 
+// PdfJob is an owner-authorized snapshot of durable processing state.
 message PdfJob {
+  // id is the public job UUID.
   string id = 1;
+  // status is the current durable lifecycle state.
   JobStatus status = 2;
+  // owner_kind identifies the authorization namespace without exposing identity details.
   OwnerKind owner_kind = 3;
+  // original_filename is the sanitized display name supplied at upload start.
   string original_filename = 4;
+  // input_size is the verified source-object size in bytes.
   int64 input_size = 5;
+  // output_size is the selected result size in bytes, or zero before completion.
   int64 output_size = 6;
+  // page_count is the validated source and result page count.
   int32 page_count = 7;
+  // selected_profile names the chosen optimization profile or original passthrough.
   string selected_profile = 8;
+  // progress_percent is indicative progress from 0 through 100.
   int32 progress_percent = 9;
+  // progress_message is a safe user-facing description without tool output.
   string progress_message = 10;
+  // target_met reports whether the selected output meets the indicative size target.
   bool target_met = 11;
+  // output_available reports whether an authorized download can currently succeed.
   bool output_available = 12;
+  // error_code is a stable machine-readable terminal failure code.
   string error_code = 13;
+  // error_message is a safe user-facing terminal failure explanation.
   string error_message = 14;
+  // created_at is the durable job creation instant.
   google.protobuf.Timestamp created_at = 15;
+  // started_at is the first successful worker-claim instant when available.
   google.protobuf.Timestamp started_at = 16;
+  // completed_at is the terminal processing instant when available.
   google.protobuf.Timestamp completed_at = 17;
+  // expires_at is the scheduled retention deadline.
   google.protobuf.Timestamp expires_at = 18;
 }
 
+// ListJobsRequest controls owner-scoped cursor pagination.
 message ListJobsRequest {
+  // page_size is the requested bounded number of jobs.
   int32 page_size = 1;
+  // page_token is an opaque cursor returned by an earlier response.
   string page_token = 2;
 }
 
+// ListJobsResponse contains one page of visible jobs.
 message ListJobsResponse {
+  // jobs are ordered according to the service's stable pagination contract.
   repeated PdfJob jobs = 1;
+  // next_page_token is empty when no later page exists.
   string next_page_token = 2;
 }
 
+// GetJobRequest identifies one job for owner-authorized lookup.
 message GetJobRequest {
+  // job_id is the public job UUID.
   string job_id = 1;
 }
 
+// GetJobResponse contains the current authoritative job snapshot.
 message GetJobResponse {
+  // job is the requested owner-authorized job.
   PdfJob job = 1;
 }
 
+// CancelJobRequest identifies one non-terminal job to cancel.
 message CancelJobRequest {
+  // job_id is the public job UUID.
   string job_id = 1;
 }
 
+// CancelJobResponse contains the state after recording cancellation.
 message CancelJobResponse {
+  // job is the updated owner-authorized job snapshot.
   PdfJob job = 1;
 }
 
+// DeleteJobRequest identifies retained job data to remove or expire.
 message DeleteJobRequest {
+  // job_id is the public job UUID.
   string job_id = 1;
 }
 
+// DeleteJobResponse confirms idempotent deletion or expiry.
 message DeleteJobResponse {}

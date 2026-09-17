@@ -5,15 +5,20 @@ package version
 import "fmt"
 
 const (
-	Name    = "go-pdf-forge"
-	Version = "0.0.2"
+	// Name is the stable application and release artifact name.
+	Name = "go-pdf-forge"
+	// Version is the semantic release version and repository source of truth.
+	Version = "0.0.3"
 )
 
 var (
+	// Commit is the source revision injected into release binaries by the linker.
 	Commit = "dev"
-	Date   = "unknown"
+	// Date is the UTC build timestamp injected into release binaries by the linker.
+	Date = "unknown"
 )
 
+// String returns the complete human-readable build identity.
 func String() string {
 	return fmt.Sprintf("%s v%s (commit %s, built %s)", Name, Version, Commit, Date)
 }

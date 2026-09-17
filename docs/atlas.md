@@ -1,0 +1,84 @@
+# Atlas du dépôt go-pdf-forge
+
+Version suivie : **v0.0.3**.
+
+Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
+Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
+
+## Gouvernance et automatisation
+
+- `.env.example` — Exemple sans secret des variables de configuration prises en charge.
+- `.github/workflows/ci.yml` — Pipeline GitHub Actions de validation continue du dépôt.
+- `.github/workflows/release.yml` — Publication GitHub déclenchée par les tags de version.
+- `.gitignore` — Règles excluant secrets, sorties de build et artefacts locaux.
+- `AGENTS.md` — Instructions durables destinées aux agents travaillant dans ce dépôt.
+- `ARCHITECTURE.md` — Décisions d’architecture, frontières de sécurité et flux de référence.
+- `CHANGELOG.md` — Historique versionné des changements livrés et à venir.
+- `LICENSE` — Licence BSD à trois clauses du projet.
+- `Makefile` — Point d’entrée reproductible pour génération, contrôles, builds et releases.
+- `README.md` — Présentation du projet et parcours opérateur principal.
+- `buf.gen.yaml` — Configuration de génération des bindings Protobuf Go et TypeScript.
+- `buf.yaml` — Module Buf et règles de lint des contrats Protobuf.
+- `go.mod` — Déclaration du module Go et de ses dépendances directes.
+- `go.sum` — Sommes cryptographiques des dépendances Go résolues.
+
+## Contrats API et bindings générés
+
+- `api/pdfjob/v1/pdf_job.proto` — Contrat Protobuf de consultation et de pilotage des jobs PDF.
+- `api/session/v1/session.proto` — Contrat Protobuf de création et de révocation des sessions anonymes.
+- `api/upload/v1/upload.proto` — Contrat Protobuf des uploads découpés et idempotents.
+- `gen/go/pdfjob/v1/pdf_job.pb.go` — Binding Go généré depuis le contrat des jobs PDF ; ne jamais modifier à la main.
+- `gen/go/pdfjob/v1/pdfjobv1connect/pdf_job.connect.go` — Stubs ConnectRPC Go générés pour le service des jobs PDF.
+- `gen/go/session/v1/session.pb.go` — Binding Go généré depuis le contrat des sessions ; ne jamais modifier à la main.
+- `gen/go/session/v1/sessionv1connect/session.connect.go` — Stubs ConnectRPC Go générés pour le service des sessions.
+- `gen/go/upload/v1/upload.pb.go` — Binding Go généré depuis le contrat des uploads ; ne jamais modifier à la main.
+- `gen/go/upload/v1/uploadv1connect/upload.connect.go` — Stubs ConnectRPC Go générés pour le service des uploads.
+- `web/src/gen/pdfjob/v1/pdf_job_pb.ts` — Binding TypeScript généré depuis le contrat des jobs PDF.
+- `web/src/gen/session/v1/session_pb.ts` — Binding TypeScript généré depuis le contrat des sessions.
+- `web/src/gen/upload/v1/upload_pb.ts` — Binding TypeScript généré depuis le contrat des uploads.
+
+## Commandes Go
+
+- `cmd/doccheck/main.go` — Vérificateur déterministe des contrats GoDoc et de l’atlas du dépôt.
+- `cmd/doccheck/main_test.go` — Tests positifs et négatifs du vérificateur documentaire.
+- `cmd/mail-poc/main.go` — Diagnostic explicite de connectivité et de remise SMTP.
+- `cmd/pdf-migrate/main.go` — Commande explicite de contrôle et d’application des migrations PostgreSQL.
+
+## Persistance
+
+- `db/migrations/20260915170000_initial.sql` — Schéma PostgreSQL initial des sessions, uploads, jobs, quotas et outbox.
+- `db/migrations/embed.go` — Embarquement typé des migrations SQL dans les binaires Go.
+- `internal/database/database.go` — Ouverture, validation et observation non sensible du pool PostgreSQL.
+- `internal/database/database_test.go` — Tests unitaires de configuration et de cycle de vie du pool.
+- `internal/database/migrate.go` — Chargement, checksum et exécution transactionnelle des migrations.
+- `internal/database/migrate_test.go` — Tests du catalogue, des checksums et du comportement du migrateur.
+
+## Domaine et infrastructure interne
+
+- `internal/anonymous/token.go` — Génération, analyse et comparaison sûre des capacités anonymes.
+- `internal/anonymous/token_test.go` — Tests de sécurité et de validation des capacités anonymes.
+- `internal/config/config.go` — Chargement et validation centralisés de la configuration applicative.
+- `internal/config/config_test.go` — Tests des valeurs par défaut et des invariants de configuration.
+- `internal/job/status.go` — Machine d’états et transitions autorisées des jobs PDF.
+- `internal/job/status_test.go` — Tests exhaustifs des transitions et états terminaux des jobs.
+- `internal/smtppoc/client.go` — Construction et envoi direct de messages SMTP selon le mode TLS choisi.
+- `internal/smtppoc/client_test.go` — Tests sans réseau de validation et de composition SMTP.
+- `internal/version/version.go` — Source de vérité de la version et identité des builds.
+- `internal/version/version_test.go` — Tests du rendu de l’identité de version.
+
+## Documentation
+
+- `docs/DOCUMENTATION.md` — Politique vérifiable de qualité et de maintenance documentaire.
+- `docs/ROADMAP.md` — Source de vérité de l’ordre, du statut et des critères des tâches GPF.
+- `docs/atlas.md` — Inventaire exact fichier par fichier du dépôt.
+- `docs/brief_go_pdf_self_service_agent.docx` — Brief produit original conservé dans son format bureautique source.
+- `docs/brief_go_pdf_self_service_agent.md` — Transcription Markdown exploitable du brief produit.
+
+## Scripts opératoires
+
+- `scripts/changelog_section.sh` — Extraction d’une section versionnée du changelog pour la publication.
+- `scripts/check_documentation_claims.sh` — Assertions reliant les promesses documentaires critiques au code et aux exemples.
+- `scripts/check_release_traceability.sh` — Contrôle bidirectionnel entre tâches roadmap terminées et changelog versionné.
+- `scripts/createLocalDBAndUser.sh` — Création sûre de la base locale, de son rôle et du fichier d’environnement privé.
+- `scripts/reducePdfSize.sh` — Référence historique du traitement Ghostscript manuel à remplacer par le worker.
+- `scripts/release.sh` — Garde finale, création du tag annoté et push atomique de la release.

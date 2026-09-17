@@ -21,11 +21,15 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// StartUploadRequest declares immutable metadata for a source PDF.
 type StartUploadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
-	Size          int64                  `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
-	ContentType   string                 `protobuf:"bytes,3,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// filename is the display name supplied by the browser, not a filesystem path.
+	Filename string `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
+	// size is the complete source size in bytes.
+	Size int64 `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
+	// content_type is the browser-declared media type and is not trusted alone.
+	ContentType   string `protobuf:"bytes,3,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -81,11 +85,15 @@ func (x *StartUploadRequest) GetContentType() string {
 	return ""
 }
 
+// StartUploadResponse gives the client the server-selected upload parameters.
 type StartUploadResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
-	ChunkSize     int32                  `protobuf:"varint,2,opt,name=chunk_size,json=chunkSize,proto3" json:"chunk_size,omitempty"`
-	ExpiresAt     string                 `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// upload_id identifies the resumable upload session.
+	UploadId string `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	// chunk_size is the required size in bytes for every non-final chunk.
+	ChunkSize int32 `protobuf:"varint,2,opt,name=chunk_size,json=chunkSize,proto3" json:"chunk_size,omitempty"`
+	// expires_at is the RFC 3339 upload-session expiry instant.
+	ExpiresAt     string `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -141,12 +149,17 @@ func (x *StartUploadResponse) GetExpiresAt() string {
 	return ""
 }
 
+// UploadChunkRequest carries one bounded source-PDF chunk.
 type UploadChunkRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
-	Index         int32                  `protobuf:"varint,2,opt,name=index,proto3" json:"index,omitempty"`
-	Data          []byte                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
-	Sha256        string                 `protobuf:"bytes,4,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// upload_id identifies the upload session that owns this chunk.
+	UploadId string `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	// index is the zero-based contiguous chunk position.
+	Index int32 `protobuf:"varint,2,opt,name=index,proto3" json:"index,omitempty"`
+	// data contains the chunk bytes and is bounded by the configured chunk size.
+	Data []byte `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	// sha256 is the lowercase hexadecimal digest of data.
+	Sha256        string `protobuf:"bytes,4,opt,name=sha256,proto3" json:"sha256,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -209,15 +222,21 @@ func (x *UploadChunkRequest) GetSha256() string {
 	return ""
 }
 
+// UploadChunkResponse reports durable upload progress.
 type UploadChunkResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Index          int32                  `protobuf:"varint,1,opt,name=index,proto3" json:"index,omitempty"`
-	Size           int64                  `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
-	AlreadyPresent bool                   `protobuf:"varint,3,opt,name=already_present,json=alreadyPresent,proto3" json:"already_present,omitempty"`
-	ReceivedChunks int32                  `protobuf:"varint,4,opt,name=received_chunks,json=receivedChunks,proto3" json:"received_chunks,omitempty"`
-	ReceivedBytes  int64                  `protobuf:"varint,5,opt,name=received_bytes,json=receivedBytes,proto3" json:"received_bytes,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// index echoes the accepted chunk position.
+	Index int32 `protobuf:"varint,1,opt,name=index,proto3" json:"index,omitempty"`
+	// size is the accepted chunk size in bytes.
+	Size int64 `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
+	// already_present is true when an identical idempotent retry was accepted.
+	AlreadyPresent bool `protobuf:"varint,3,opt,name=already_present,json=alreadyPresent,proto3" json:"already_present,omitempty"`
+	// received_chunks is the number of distinct chunks recorded so far.
+	ReceivedChunks int32 `protobuf:"varint,4,opt,name=received_chunks,json=receivedChunks,proto3" json:"received_chunks,omitempty"`
+	// received_bytes is the sum of distinct recorded chunk sizes.
+	ReceivedBytes int64 `protobuf:"varint,5,opt,name=received_bytes,json=receivedBytes,proto3" json:"received_bytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UploadChunkResponse) Reset() {
@@ -285,11 +304,16 @@ func (x *UploadChunkResponse) GetReceivedBytes() int64 {
 	return 0
 }
 
+// CommitUploadRequest supplies the expected complete-object digest and options.
 type CommitUploadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
-	Sha256        string                 `protobuf:"bytes,2,opt,name=sha256,proto3" json:"sha256,omitempty"`
-	NotifyEmail   bool                   `protobuf:"varint,3,opt,name=notify_email,json=notifyEmail,proto3" json:"notify_email,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// upload_id identifies the upload session to finalize.
+	UploadId string `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	// sha256 is the lowercase hexadecimal digest expected for the complete PDF.
+	Sha256 string `protobuf:"bytes,2,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	// notify_email requests authenticated-user notification; anonymous sessions
+	// are never allowed to enable it.
+	NotifyEmail   bool `protobuf:"varint,3,opt,name=notify_email,json=notifyEmail,proto3" json:"notify_email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -345,9 +369,11 @@ func (x *CommitUploadRequest) GetNotifyEmail() bool {
 	return false
 }
 
+// CommitUploadResponse identifies the durable job created after verification.
 type CommitUploadResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// job_id identifies the queued PDF processing job.
+	JobId         string `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -389,9 +415,11 @@ func (x *CommitUploadResponse) GetJobId() string {
 	return ""
 }
 
+// AbortUploadRequest identifies an incomplete upload to abandon.
 type AbortUploadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// upload_id identifies the caller-owned upload session.
+	UploadId      string `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -433,6 +461,7 @@ func (x *AbortUploadRequest) GetUploadId() string {
 	return ""
 }
 
+// AbortUploadResponse confirms idempotent upload abandonment.
 type AbortUploadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields

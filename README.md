@@ -1,6 +1,6 @@
 # go-pdf-forge
 
-Current version: **v0.0.2** — fondation pré-alpha, le parcours PDF complet est
+Current version: **v0.0.3** — fondation pré-alpha, le parcours PDF complet est
 encore en cours d'implémentation.
 
 Service cloud-native de traitement asynchrone de PDF, écrit en Go, avec une
@@ -12,6 +12,9 @@ Le projet est en construction. Les décisions stabilisées et les limites de
 sécurité sont décrites dans [ARCHITECTURE.md](ARCHITECTURE.md). Le brief source
 se trouve dans [docs/brief_go_pdf_self_service_agent.md](docs/brief_go_pdf_self_service_agent.md)
 et le plan d'action suivi dans [docs/ROADMAP.md](docs/ROADMAP.md).
+La politique de qualité documentaire est définie dans
+[docs/DOCUMENTATION.md](docs/DOCUMENTATION.md), avec un inventaire navigable de
+tous les fichiers dans [docs/atlas.md](docs/atlas.md).
 
 ## Prérequis de développement
 
@@ -30,7 +33,8 @@ les commandes du dépôt et ne doit pas être commité.
 ```bash
 make generate       # génère les clients/serveurs Go et TypeScript
 make test           # lance les tests Go
-make check          # format, lint Protobuf, tests et go vet
+make docs-check     # contrôle GoDoc, atlas et promesses documentées
+make check          # format, lint, tests, vet et documentation
 make build          # construit les binaires présents dans cmd/
 make release-check  # garde complète avant commit/tag
 ```
@@ -82,8 +86,8 @@ dans la roadmap.
 make release-prepare
 git add <fichiers-relus>
 git diff --cached --check
-git commit -m "chore(release): prepare v0.0.2"
-CONFIRM_RELEASE=v0.0.2 make release
+git commit -m "chore(release): prepare v0.0.3"
+CONFIRM_RELEASE=v0.0.3 make release
 ```
 
 La dernière commande exige une branche `main` propre, recrée tous les contrôles,

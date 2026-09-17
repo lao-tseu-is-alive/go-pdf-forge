@@ -49,9 +49,13 @@ const (
 
 // UploadServiceClient is a client for the upload.v1.UploadService service.
 type UploadServiceClient interface {
+	// StartUpload validates metadata and opens a resumable upload session.
 	StartUpload(context.Context, *connect.Request[v1.StartUploadRequest]) (*connect.Response[v1.StartUploadResponse], error)
+	// UploadChunk idempotently records one integrity-protected chunk.
 	UploadChunk(context.Context, *connect.Request[v1.UploadChunkRequest]) (*connect.Response[v1.UploadChunkResponse], error)
+	// CommitUpload verifies the complete object and creates a durable PDF job.
 	CommitUpload(context.Context, *connect.Request[v1.CommitUploadRequest]) (*connect.Response[v1.CommitUploadResponse], error)
+	// AbortUpload abandons an incomplete upload and its temporary object state.
 	AbortUpload(context.Context, *connect.Request[v1.AbortUploadRequest]) (*connect.Response[v1.AbortUploadResponse], error)
 }
 
@@ -123,9 +127,13 @@ func (c *uploadServiceClient) AbortUpload(ctx context.Context, req *connect.Requ
 
 // UploadServiceHandler is an implementation of the upload.v1.UploadService service.
 type UploadServiceHandler interface {
+	// StartUpload validates metadata and opens a resumable upload session.
 	StartUpload(context.Context, *connect.Request[v1.StartUploadRequest]) (*connect.Response[v1.StartUploadResponse], error)
+	// UploadChunk idempotently records one integrity-protected chunk.
 	UploadChunk(context.Context, *connect.Request[v1.UploadChunkRequest]) (*connect.Response[v1.UploadChunkResponse], error)
+	// CommitUpload verifies the complete object and creates a durable PDF job.
 	CommitUpload(context.Context, *connect.Request[v1.CommitUploadRequest]) (*connect.Response[v1.CommitUploadResponse], error)
+	// AbortUpload abandons an incomplete upload and its temporary object state.
 	AbortUpload(context.Context, *connect.Request[v1.AbortUploadRequest]) (*connect.Response[v1.AbortUploadResponse], error)
 }
 

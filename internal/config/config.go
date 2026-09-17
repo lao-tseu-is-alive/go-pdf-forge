@@ -17,60 +17,106 @@ const (
 	defaultTargetBytes    int64 = 75 * 1024 * 1024
 )
 
+// AuthMode controls whether authenticated and anonymous identities are accepted.
 type AuthMode string
 
 const (
-	AuthRequired  AuthMode = "required"
-	AuthOptional  AuthMode = "optional"
+	// AuthRequired accepts only requests carrying a valid employee JWT.
+	AuthRequired AuthMode = "required"
+	// AuthOptional accepts a valid employee JWT or an anonymous capability.
+	AuthOptional AuthMode = "optional"
+	// AuthAnonymous disables login and requires anonymous capabilities.
 	AuthAnonymous AuthMode = "anonymous"
 )
 
+// LookupEnv abstracts environment access so configuration parsing is testable
+// without mutating the process environment.
 type LookupEnv func(string) (string, bool)
 
+// Config contains the complete validated runtime configuration shared by API
+// and worker processes. Secret fields must never be logged as a whole value.
 type Config struct {
-	Auth              AuthMode
-	MaxUploadBytes    int64
-	UploadChunkBytes  int64
-	PDFTargetBytes    int64
-	JobRetention      time.Duration
+	// Auth selects the accepted identity modes.
+	Auth AuthMode
+	// MaxUploadBytes is the maximum declared size of one source PDF.
+	MaxUploadBytes int64
+	// UploadChunkBytes is the chunk size browsers should use for uploads.
+	UploadChunkBytes int64
+	// PDFTargetBytes is the indicative best-effort output-size target.
+	PDFTargetBytes int64
+	// JobRetention determines when completed objects and metadata expire.
+	JobRetention time.Duration
+	// WorkerConcurrency bounds simultaneous PDF-processing jobs per worker.
 	WorkerConcurrency int
-	Anonymous         Anonymous
-	Database          Database
-	ObjectStore       ObjectStore
+	// Anonymous contains capability-security and lifetime settings.
+	Anonymous Anonymous
+	// Database contains PostgreSQL connection-pool settings.
+	Database Database
+	// ObjectStore contains S3-compatible storage settings.
+	ObjectStore ObjectStore
 }
 
+// Anonymous contains configuration for anonymous session capabilities.
 type Anonymous struct {
+	// TokenPepper is the deployment secret used to HMAC capability secrets.
 	TokenPepper []byte
-	SessionTTL  time.Duration
+	// SessionTTL is the validity period assigned to a new anonymous session.
+	SessionTTL time.Duration
 }
 
+// Database contains PostgreSQL connection, timeout, and pool settings.
 type Database struct {
-	Driver            string
-	Host              string
-	Port              int
-	Name              string
-	User              string
-	Password          string
-	SSLMode           string
-	ConnectTimeout    time.Duration
-	HealthTimeout     time.Duration
-	MigrationTimeout  time.Duration
-	MaxConnections    int
-	MinConnections    int
-	MaxConnectionAge  time.Duration
+	// Driver identifies the supported database implementation; it must be postgres.
+	Driver string
+	// Host is the PostgreSQL server hostname or IP address.
+	Host string
+	// Port is the PostgreSQL TCP port.
+	Port int
+	// Name is the PostgreSQL database name.
+	Name string
+	// User is the PostgreSQL login role.
+	User string
+	// Password is the PostgreSQL credential and must never be logged.
+	Password string
+	// SSLMode is the pgx TLS verification mode.
+	SSLMode string
+	// ConnectTimeout bounds initial pool creation and connectivity checks.
+	ConnectTimeout time.Duration
+	// HealthTimeout bounds an individual readiness ping.
+	HealthTimeout time.Duration
+	// MigrationTimeout bounds one complete migration transaction.
+	MigrationTimeout time.Duration
+	// MaxConnections is the upper bound of connections in one process pool.
+	MaxConnections int
+	// MinConnections is the number of idle connections the pool tries to retain.
+	MinConnections int
+	// MaxConnectionAge retires connections after this lifetime.
+	MaxConnectionAge time.Duration
+	// MaxConnectionIdle retires connections idle longer than this duration.
 	MaxConnectionIdle time.Duration
+	// HealthCheckPeriod controls how often pgx checks idle connections.
 	HealthCheckPeriod time.Duration
 }
 
+// ObjectStore contains credentials and addressing for the S3-compatible blob
+// store. SecretAccessKey must never be logged.
 type ObjectStore struct {
-	Endpoint        string
-	Region          string
-	Bucket          string
-	AccessKeyID     string
+	// Endpoint is the absolute HTTP(S) endpoint of the S3-compatible service.
+	Endpoint string
+	// Region is the S3 signing region.
+	Region string
+	// Bucket contains temporary PDF inputs and results.
+	Bucket string
+	// AccessKeyID identifies the S3 credential.
+	AccessKeyID string
+	// SecretAccessKey authenticates the S3 credential and must never be logged.
 	SecretAccessKey string
-	PathStyle       bool
+	// PathStyle forces bucket names into URL paths for Garage compatibility.
+	PathStyle bool
 }
 
+// Load parses and validates the complete process configuration. It does not
+// read dotenv files; callers decide how environment variables are populated.
 func Load(lookup LookupEnv) (Config, error) {
 	if lookup == nil {
 		return Config{}, errors.New("environment lookup is required")
@@ -137,6 +183,8 @@ func Load(lookup LookupEnv) (Config, error) {
 	return cfg, cfg.Validate()
 }
 
+// Validate reports every invalid complete-runtime setting without including
+// secret values in its errors.
 func (cfg Config) Validate() error {
 	var problems []error
 	if _, err := parseAuthMode(string(cfg.Auth)); err != nil {
@@ -259,6 +307,8 @@ func databaseFromEnvironment(lookup LookupEnv) (Database, error) {
 	return database, nil
 }
 
+// Validate reports every invalid PostgreSQL setting without exposing the
+// password or a connection string.
 func (cfg Database) Validate() error {
 	return errors.Join(cfg.validate()...)
 }

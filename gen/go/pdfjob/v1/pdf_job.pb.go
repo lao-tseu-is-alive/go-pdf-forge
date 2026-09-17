@@ -22,18 +22,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// JobStatus is the externally visible durable processing state.
 type JobStatus int32
 
 const (
+	// JOB_STATUS_UNSPECIFIED represents an absent or unknown status.
 	JobStatus_JOB_STATUS_UNSPECIFIED JobStatus = 0
-	JobStatus_JOB_STATUS_QUEUED      JobStatus = 1
-	JobStatus_JOB_STATUS_ANALYZING   JobStatus = 2
-	JobStatus_JOB_STATUS_OPTIMIZING  JobStatus = 3
-	JobStatus_JOB_STATUS_VALIDATING  JobStatus = 4
-	JobStatus_JOB_STATUS_COMPLETED   JobStatus = 5
-	JobStatus_JOB_STATUS_FAILED      JobStatus = 6
-	JobStatus_JOB_STATUS_CANCELLED   JobStatus = 7
-	JobStatus_JOB_STATUS_EXPIRED     JobStatus = 8
+	// JOB_STATUS_QUEUED means the job is available for worker claim.
+	JobStatus_JOB_STATUS_QUEUED JobStatus = 1
+	// JOB_STATUS_ANALYZING means the source PDF is being inspected.
+	JobStatus_JOB_STATUS_ANALYZING JobStatus = 2
+	// JOB_STATUS_OPTIMIZING means an output candidate is being produced.
+	JobStatus_JOB_STATUS_OPTIMIZING JobStatus = 3
+	// JOB_STATUS_VALIDATING means an output candidate is being verified.
+	JobStatus_JOB_STATUS_VALIDATING JobStatus = 4
+	// JOB_STATUS_COMPLETED means a valid best-effort output is available.
+	JobStatus_JOB_STATUS_COMPLETED JobStatus = 5
+	// JOB_STATUS_FAILED means processing ended with a stable error.
+	JobStatus_JOB_STATUS_FAILED JobStatus = 6
+	// JOB_STATUS_CANCELLED means cooperative cancellation completed.
+	JobStatus_JOB_STATUS_CANCELLED JobStatus = 7
+	// JOB_STATUS_EXPIRED means retained data is no longer available.
+	JobStatus_JOB_STATUS_EXPIRED JobStatus = 8
 )
 
 // Enum value maps for JobStatus.
@@ -89,12 +99,16 @@ func (JobStatus) EnumDescriptor() ([]byte, []int) {
 	return file_pdfjob_v1_pdf_job_proto_rawDescGZIP(), []int{0}
 }
 
+// OwnerKind identifies which authorization namespace owns a job.
 type OwnerKind int32
 
 const (
-	OwnerKind_OWNER_KIND_UNSPECIFIED   OwnerKind = 0
+	// OWNER_KIND_UNSPECIFIED represents an absent or unknown owner kind.
+	OwnerKind_OWNER_KIND_UNSPECIFIED OwnerKind = 0
+	// OWNER_KIND_AUTHENTICATED belongs to a validated employee identity.
 	OwnerKind_OWNER_KIND_AUTHENTICATED OwnerKind = 1
-	OwnerKind_OWNER_KIND_ANONYMOUS     OwnerKind = 2
+	// OWNER_KIND_ANONYMOUS belongs to an anonymous capability session.
+	OwnerKind_OWNER_KIND_ANONYMOUS OwnerKind = 2
 )
 
 // Enum value maps for OwnerKind.
@@ -138,28 +152,47 @@ func (OwnerKind) EnumDescriptor() ([]byte, []int) {
 	return file_pdfjob_v1_pdf_job_proto_rawDescGZIP(), []int{1}
 }
 
+// PdfJob is an owner-authorized snapshot of durable processing state.
 type PdfJob struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status           JobStatus              `protobuf:"varint,2,opt,name=status,proto3,enum=pdfjob.v1.JobStatus" json:"status,omitempty"`
-	OwnerKind        OwnerKind              `protobuf:"varint,3,opt,name=owner_kind,json=ownerKind,proto3,enum=pdfjob.v1.OwnerKind" json:"owner_kind,omitempty"`
-	OriginalFilename string                 `protobuf:"bytes,4,opt,name=original_filename,json=originalFilename,proto3" json:"original_filename,omitempty"`
-	InputSize        int64                  `protobuf:"varint,5,opt,name=input_size,json=inputSize,proto3" json:"input_size,omitempty"`
-	OutputSize       int64                  `protobuf:"varint,6,opt,name=output_size,json=outputSize,proto3" json:"output_size,omitempty"`
-	PageCount        int32                  `protobuf:"varint,7,opt,name=page_count,json=pageCount,proto3" json:"page_count,omitempty"`
-	SelectedProfile  string                 `protobuf:"bytes,8,opt,name=selected_profile,json=selectedProfile,proto3" json:"selected_profile,omitempty"`
-	ProgressPercent  int32                  `protobuf:"varint,9,opt,name=progress_percent,json=progressPercent,proto3" json:"progress_percent,omitempty"`
-	ProgressMessage  string                 `protobuf:"bytes,10,opt,name=progress_message,json=progressMessage,proto3" json:"progress_message,omitempty"`
-	TargetMet        bool                   `protobuf:"varint,11,opt,name=target_met,json=targetMet,proto3" json:"target_met,omitempty"`
-	OutputAvailable  bool                   `protobuf:"varint,12,opt,name=output_available,json=outputAvailable,proto3" json:"output_available,omitempty"`
-	ErrorCode        string                 `protobuf:"bytes,13,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
-	ErrorMessage     string                 `protobuf:"bytes,14,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
-	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	StartedAt        *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
-	CompletedAt      *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
-	ExpiresAt        *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the public job UUID.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// status is the current durable lifecycle state.
+	Status JobStatus `protobuf:"varint,2,opt,name=status,proto3,enum=pdfjob.v1.JobStatus" json:"status,omitempty"`
+	// owner_kind identifies the authorization namespace without exposing identity details.
+	OwnerKind OwnerKind `protobuf:"varint,3,opt,name=owner_kind,json=ownerKind,proto3,enum=pdfjob.v1.OwnerKind" json:"owner_kind,omitempty"`
+	// original_filename is the sanitized display name supplied at upload start.
+	OriginalFilename string `protobuf:"bytes,4,opt,name=original_filename,json=originalFilename,proto3" json:"original_filename,omitempty"`
+	// input_size is the verified source-object size in bytes.
+	InputSize int64 `protobuf:"varint,5,opt,name=input_size,json=inputSize,proto3" json:"input_size,omitempty"`
+	// output_size is the selected result size in bytes, or zero before completion.
+	OutputSize int64 `protobuf:"varint,6,opt,name=output_size,json=outputSize,proto3" json:"output_size,omitempty"`
+	// page_count is the validated source and result page count.
+	PageCount int32 `protobuf:"varint,7,opt,name=page_count,json=pageCount,proto3" json:"page_count,omitempty"`
+	// selected_profile names the chosen optimization profile or original passthrough.
+	SelectedProfile string `protobuf:"bytes,8,opt,name=selected_profile,json=selectedProfile,proto3" json:"selected_profile,omitempty"`
+	// progress_percent is indicative progress from 0 through 100.
+	ProgressPercent int32 `protobuf:"varint,9,opt,name=progress_percent,json=progressPercent,proto3" json:"progress_percent,omitempty"`
+	// progress_message is a safe user-facing description without tool output.
+	ProgressMessage string `protobuf:"bytes,10,opt,name=progress_message,json=progressMessage,proto3" json:"progress_message,omitempty"`
+	// target_met reports whether the selected output meets the indicative size target.
+	TargetMet bool `protobuf:"varint,11,opt,name=target_met,json=targetMet,proto3" json:"target_met,omitempty"`
+	// output_available reports whether an authorized download can currently succeed.
+	OutputAvailable bool `protobuf:"varint,12,opt,name=output_available,json=outputAvailable,proto3" json:"output_available,omitempty"`
+	// error_code is a stable machine-readable terminal failure code.
+	ErrorCode string `protobuf:"bytes,13,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
+	// error_message is a safe user-facing terminal failure explanation.
+	ErrorMessage string `protobuf:"bytes,14,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// created_at is the durable job creation instant.
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// started_at is the first successful worker-claim instant when available.
+	StartedAt *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
+	// completed_at is the terminal processing instant when available.
+	CompletedAt *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	// expires_at is the scheduled retention deadline.
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PdfJob) Reset() {
@@ -318,10 +351,13 @@ func (x *PdfJob) GetExpiresAt() *timestamppb.Timestamp {
 	return nil
 }
 
+// ListJobsRequest controls owner-scoped cursor pagination.
 type ListJobsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// page_size is the requested bounded number of jobs.
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// page_token is an opaque cursor returned by an earlier response.
+	PageToken     string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -370,10 +406,13 @@ func (x *ListJobsRequest) GetPageToken() string {
 	return ""
 }
 
+// ListJobsResponse contains one page of visible jobs.
 type ListJobsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Jobs          []*PdfJob              `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// jobs are ordered according to the service's stable pagination contract.
+	Jobs []*PdfJob `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
+	// next_page_token is empty when no later page exists.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -422,9 +461,11 @@ func (x *ListJobsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// GetJobRequest identifies one job for owner-authorized lookup.
 type GetJobRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// job_id is the public job UUID.
+	JobId         string `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -466,9 +507,11 @@ func (x *GetJobRequest) GetJobId() string {
 	return ""
 }
 
+// GetJobResponse contains the current authoritative job snapshot.
 type GetJobResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Job           *PdfJob                `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// job is the requested owner-authorized job.
+	Job           *PdfJob `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -510,9 +553,11 @@ func (x *GetJobResponse) GetJob() *PdfJob {
 	return nil
 }
 
+// CancelJobRequest identifies one non-terminal job to cancel.
 type CancelJobRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// job_id is the public job UUID.
+	JobId         string `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -554,9 +599,11 @@ func (x *CancelJobRequest) GetJobId() string {
 	return ""
 }
 
+// CancelJobResponse contains the state after recording cancellation.
 type CancelJobResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Job           *PdfJob                `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// job is the updated owner-authorized job snapshot.
+	Job           *PdfJob `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -598,9 +645,11 @@ func (x *CancelJobResponse) GetJob() *PdfJob {
 	return nil
 }
 
+// DeleteJobRequest identifies retained job data to remove or expire.
 type DeleteJobRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// job_id is the public job UUID.
+	JobId         string `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -642,6 +691,7 @@ func (x *DeleteJobRequest) GetJobId() string {
 	return ""
 }
 
+// DeleteJobResponse confirms idempotent deletion or expiry.
 type DeleteJobResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields

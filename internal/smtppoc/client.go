@@ -16,28 +16,46 @@ import (
 	"time"
 )
 
+// Mode selects the single SMTP transport negotiated by the diagnostic client.
 type Mode string
 
 const (
-	ModePlain    Mode = "plain"
+	// ModePlain uses SMTP without transport encryption for a trusted relay.
+	ModePlain Mode = "plain"
+	// ModeSTARTTLS upgrades an initially plain SMTP connection and fails closed
+	// when the server does not advertise STARTTLS.
 	ModeSTARTTLS Mode = "starttls"
-	ModeTLS      Mode = "tls"
+	// ModeTLS establishes implicit TLS before speaking SMTP.
+	ModeTLS Mode = "tls"
 )
 
+// Subject is the fixed subject used by the SMTP connectivity diagnostic.
 const Subject = "[PDF Service POC] Test SMTP"
 
+// Config contains one SMTP diagnostic delivery path. It intentionally has no
+// fallback provider because silent transport downgrades would hide failures.
 type Config struct {
-	Host           string
-	Port           int
-	Mode           Mode
-	From           string
-	To             string
-	Username       string
-	Password       string
+	// Host is the SMTP server hostname used for dialing and TLS verification.
+	Host string
+	// Port is the SMTP TCP port.
+	Port int
+	// Mode selects plain SMTP, STARTTLS, or implicit TLS.
+	Mode Mode
+	// From is the RFC 5322 sender mailbox.
+	From string
+	// To is the single RFC 5322 recipient mailbox.
+	To string
+	// Username enables SMTP AUTH when set together with Password.
+	Username string
+	// Password is the optional SMTP credential and must never be logged.
+	Password string
+	// ClientHostname is the optional hostname sent with HELO/EHLO.
 	ClientHostname string
-	Timeout        time.Duration
+	// Timeout bounds dialing and the complete SMTP exchange.
+	Timeout time.Duration
 }
 
+// ParseMode normalizes and validates an SMTP transport name.
 func ParseMode(value string) (Mode, error) {
 	mode := Mode(strings.ToLower(strings.TrimSpace(value)))
 	switch mode {
@@ -48,6 +66,7 @@ func ParseMode(value string) (Mode, error) {
 	}
 }
 
+// Validate reports all invalid SMTP settings without including Password.
 func (cfg Config) Validate() error {
 	var problems []string
 	if strings.TrimSpace(cfg.Host) == "" {
@@ -77,6 +96,7 @@ func (cfg Config) Validate() error {
 	return errors.Join(stringErrors(problems)...)
 }
 
+// Address returns the validated host and port in network dial form.
 func (cfg Config) Address() string {
 	return net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
 }
@@ -173,6 +193,8 @@ func Send(ctx context.Context, cfg Config, body string) error {
 	return nil
 }
 
+// BuildMessage constructs a minimal UTF-8 text message with CRLF line endings
+// and rejects header injection through addresses or the subject.
 func BuildMessage(from, to, subject, body string, sentAt time.Time) (string, error) {
 	if containsNewline(subject) {
 		return "", errors.New("SMTP subject contains a newline")

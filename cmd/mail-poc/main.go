@@ -1,3 +1,4 @@
+// Command mail-poc validates one explicitly configured SMTP delivery path.
 package main
 
 import (

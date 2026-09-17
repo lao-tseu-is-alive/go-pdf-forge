@@ -5,51 +5,84 @@ package upload.v1;
 // UploadService receives browser-compatible unary chunks and creates a PDF job
 // only after the committed object has passed its integrity checks.
 service UploadService {
+  // StartUpload validates metadata and opens a resumable upload session.
   rpc StartUpload(StartUploadRequest) returns (StartUploadResponse);
+  // UploadChunk idempotently records one integrity-protected chunk.
   rpc UploadChunk(UploadChunkRequest) returns (UploadChunkResponse);
+  // CommitUpload verifies the complete object and creates a durable PDF job.
   rpc CommitUpload(CommitUploadRequest) returns (CommitUploadResponse);
+  // AbortUpload abandons an incomplete upload and its temporary object state.
   rpc AbortUpload(AbortUploadRequest) returns (AbortUploadResponse);
 }
 
+// StartUploadRequest declares immutable metadata for a source PDF.
 message StartUploadRequest {
+  // filename is the display name supplied by the browser, not a filesystem path.
   string filename = 1;
+  // size is the complete source size in bytes.
   int64 size = 2;
+  // content_type is the browser-declared media type and is not trusted alone.
   string content_type = 3;
 }
 
+// StartUploadResponse gives the client the server-selected upload parameters.
 message StartUploadResponse {
+  // upload_id identifies the resumable upload session.
   string upload_id = 1;
+  // chunk_size is the required size in bytes for every non-final chunk.
   int32 chunk_size = 2;
+  // expires_at is the RFC 3339 upload-session expiry instant.
   string expires_at = 3;
 }
 
+// UploadChunkRequest carries one bounded source-PDF chunk.
 message UploadChunkRequest {
+  // upload_id identifies the upload session that owns this chunk.
   string upload_id = 1;
+  // index is the zero-based contiguous chunk position.
   int32 index = 2;
+  // data contains the chunk bytes and is bounded by the configured chunk size.
   bytes data = 3;
+  // sha256 is the lowercase hexadecimal digest of data.
   string sha256 = 4;
 }
 
+// UploadChunkResponse reports durable upload progress.
 message UploadChunkResponse {
+  // index echoes the accepted chunk position.
   int32 index = 1;
+  // size is the accepted chunk size in bytes.
   int64 size = 2;
+  // already_present is true when an identical idempotent retry was accepted.
   bool already_present = 3;
+  // received_chunks is the number of distinct chunks recorded so far.
   int32 received_chunks = 4;
+  // received_bytes is the sum of distinct recorded chunk sizes.
   int64 received_bytes = 5;
 }
 
+// CommitUploadRequest supplies the expected complete-object digest and options.
 message CommitUploadRequest {
+  // upload_id identifies the upload session to finalize.
   string upload_id = 1;
+  // sha256 is the lowercase hexadecimal digest expected for the complete PDF.
   string sha256 = 2;
+  // notify_email requests authenticated-user notification; anonymous sessions
+  // are never allowed to enable it.
   bool notify_email = 3;
 }
 
+// CommitUploadResponse identifies the durable job created after verification.
 message CommitUploadResponse {
+  // job_id identifies the queued PDF processing job.
   string job_id = 1;
 }
 
+// AbortUploadRequest identifies an incomplete upload to abandon.
 message AbortUploadRequest {
+  // upload_id identifies the caller-owned upload session.
   string upload_id = 1;
 }
 
+// AbortUploadResponse confirms idempotent upload abandonment.
 message AbortUploadResponse {}

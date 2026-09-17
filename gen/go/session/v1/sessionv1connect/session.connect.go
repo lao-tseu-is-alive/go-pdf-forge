@@ -40,6 +40,7 @@ const (
 
 // SessionServiceClient is a client for the session.v1.SessionService service.
 type SessionServiceClient interface {
+	// CreateAnonymousSession returns a bearer capability exactly once.
 	CreateAnonymousSession(context.Context, *connect.Request[v1.CreateAnonymousSessionRequest]) (*connect.Response[v1.CreateAnonymousSessionResponse], error)
 }
 
@@ -75,6 +76,7 @@ func (c *sessionServiceClient) CreateAnonymousSession(ctx context.Context, req *
 
 // SessionServiceHandler is an implementation of the session.v1.SessionService service.
 type SessionServiceHandler interface {
+	// CreateAnonymousSession returns a bearer capability exactly once.
 	CreateAnonymousSession(context.Context, *connect.Request[v1.CreateAnonymousSessionRequest]) (*connect.Response[v1.CreateAnonymousSessionResponse], error)
 }
 

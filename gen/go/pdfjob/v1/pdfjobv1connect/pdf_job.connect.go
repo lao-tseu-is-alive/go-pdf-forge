@@ -45,9 +45,13 @@ const (
 
 // PdfJobServiceClient is a client for the pdfjob.v1.PdfJobService service.
 type PdfJobServiceClient interface {
+	// ListJobs returns a page of jobs visible to the current owner.
 	ListJobs(context.Context, *connect.Request[v1.ListJobsRequest]) (*connect.Response[v1.ListJobsResponse], error)
+	// GetJob returns one owner-authorized job snapshot.
 	GetJob(context.Context, *connect.Request[v1.GetJobRequest]) (*connect.Response[v1.GetJobResponse], error)
+	// CancelJob requests cooperative cancellation of a non-terminal job.
 	CancelJob(context.Context, *connect.Request[v1.CancelJobRequest]) (*connect.Response[v1.CancelJobResponse], error)
+	// DeleteJob removes or expires caller-owned retained job data idempotently.
 	DeleteJob(context.Context, *connect.Request[v1.DeleteJobRequest]) (*connect.Response[v1.DeleteJobResponse], error)
 }
 
@@ -119,9 +123,13 @@ func (c *pdfJobServiceClient) DeleteJob(ctx context.Context, req *connect.Reques
 
 // PdfJobServiceHandler is an implementation of the pdfjob.v1.PdfJobService service.
 type PdfJobServiceHandler interface {
+	// ListJobs returns a page of jobs visible to the current owner.
 	ListJobs(context.Context, *connect.Request[v1.ListJobsRequest]) (*connect.Response[v1.ListJobsResponse], error)
+	// GetJob returns one owner-authorized job snapshot.
 	GetJob(context.Context, *connect.Request[v1.GetJobRequest]) (*connect.Response[v1.GetJobResponse], error)
+	// CancelJob requests cooperative cancellation of a non-terminal job.
 	CancelJob(context.Context, *connect.Request[v1.CancelJobRequest]) (*connect.Response[v1.CancelJobResponse], error)
+	// DeleteJob removes or expires caller-owned retained job data idempotently.
 	DeleteJob(context.Context, *connect.Request[v1.DeleteJobRequest]) (*connect.Response[v1.DeleteJobResponse], error)
 }
 
