@@ -7,7 +7,7 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS := -s -w -X $(VERSION_PKG).Commit=$(GIT_COMMIT) -X $(VERSION_PKG).Date=$(BUILD_DATE)
 
-.PHONY: build changelog-check check fmt generate generated-check proto-check release release-check release-prepare roadmap-check scripts-check test version-check vet
+.PHONY: build changelog-check check fmt generate generated-check proto-check release release-check release-prepare release-traceability-check roadmap-check scripts-check test version-check vet
 
 generate:
 	$(BUF) generate
@@ -64,7 +64,10 @@ roadmap-check:
 	@grep -q '^## Prochaine action$$' docs/ROADMAP.md || { echo "roadmap-check: missing next-action section"; exit 1; }
 	@echo "roadmap-check: OK"
 
-release-check: check generated-check version-check changelog-check scripts-check roadmap-check build
+release-traceability-check:
+	@bash scripts/check_release_traceability.sh
+
+release-check: check generated-check version-check changelog-check scripts-check roadmap-check release-traceability-check build
 	@./bin/mail-poc --version | grep -q "^go-pdf-forge v$(VERSION) (commit $(GIT_COMMIT), built "
 	@./bin/pdf-migrate --version | grep -q "^go-pdf-forge v$(VERSION) (commit $(GIT_COMMIT), built "
 	@echo "release-check: v$(VERSION) OK"

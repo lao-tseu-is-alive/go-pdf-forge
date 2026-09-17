@@ -64,6 +64,7 @@ Reuse ideas and contracts deliberately; do not copy obsolete or unsafe implement
 - Keep changes incremental and compiling; write tests with each behavior.
 - `internal/version/version.go` is the release version source of truth. A release updates it, the README current-version banner and a versioned `CHANGELOG.md` section in the same commit.
 - Update `docs/ROADMAP.md` whenever a task starts, completes, changes scope, or changes order. Task IDs are stable and must remain unique.
+- Every completed roadmap task must appear by ID in a dated `CHANGELOG.md` section, and every released task ID must be marked complete in the roadmap; `make release-check` enforces both directions.
 - Before a release commit run `make release-prepare`; after committing, `CONFIRM_RELEASE=vX.Y.Z make release` requires a clean `main`, creates an annotated tag and atomically pushes `main` plus the tag. Never bypass `make release-check`.
 - Treat `.proto` files as authoritative and never hand-edit generated files.
 - Prefer `rg`, existing scripts, Make targets, and `uv` for any Python tooling.

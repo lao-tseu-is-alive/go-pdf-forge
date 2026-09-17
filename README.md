@@ -73,7 +73,10 @@ email aux sessions anonymes.
 
 La version dans `internal/version/version.go` est la source de vérité. Chaque
 release doit mettre à jour cette constante, le bandeau du README et une section
-versionnée de `CHANGELOG.md` dans le même commit.
+versionnée de `CHANGELOG.md` dans le même commit. Toute tâche `GPF-*` terminée
+doit être citée explicitement dans une section versionnée du changelog ; la
+garde de release vérifie aussi qu'une tâche annoncée comme livrée est cochée
+dans la roadmap.
 
 ```bash
 make release-prepare

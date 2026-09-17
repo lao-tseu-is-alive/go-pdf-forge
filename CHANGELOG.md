@@ -6,6 +6,11 @@ projet utilise le versionnement sémantique.
 
 ## [Unreleased]
 
+### Changed
+
+- La garde de release vérifie désormais la traçabilité bidirectionnelle entre
+  les tâches terminées de la roadmap et les sections versionnées du changelog.
+
 ### À venir
 
 - Sessions anonymes persistantes avec capacités révocables.
@@ -22,8 +27,9 @@ la feuille de route.
 
 - Roadmap d'implémentation versionnée avec identifiants de tâches stables,
   critères de sortie par phase et contrôle automatique avant release.
-- Socle PostgreSQL `pgxpool` avec limites et timeouts configurables, logs sans
-  DSN ni mot de passe, health check borné et migrations embarquées explicites.
+- **GPF-001** — Socle PostgreSQL `pgxpool` avec limites et timeouts
+  configurables, logs sans DSN ni mot de passe, health check borné et
+  migrations embarquées explicites.
 
 ## [0.0.1] - 2026-09-15
 
