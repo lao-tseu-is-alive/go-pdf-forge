@@ -13,7 +13,8 @@ generate:
 	$(BUF) generate
 
 generated-check:
-	@snapshot="$$(mktemp -d)"; \
+	@set -e; \
+		snapshot="$$(mktemp -d)"; \
 		trap 'rm -rf "$$snapshot"' EXIT; \
 		cp -a gen/go "$$snapshot/gen-go"; \
 		cp -a web/src/gen "$$snapshot/web-gen"; \

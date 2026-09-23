@@ -12,6 +12,29 @@ projet utilise le versionnement sémantique.
 - Stockage multipart Garage/S3 et handlers ConnectRPC.
 - Worker Ghostscript et interface Vue.
 
+## [0.0.5] - 2026-09-23
+
+Cette version livre les quotas anonymes persistants et atomiques qui protègent
+les futurs endpoints publics sans coordination locale entre réplicas.
+
+### Added
+
+- **GPF-003** — Compteurs PostgreSQL atomiques par session et empreinte IP pour
+  les créations de sessions, démarrages d'uploads, créations de jobs et octets
+  validés.
+- Limites configurables par fenêtre UTC, avec valeurs initiales documentées et
+  erreurs de dépassement dépourvues d'identifiants sensibles.
+- Migration append-only ajoutant les agrégats par IP et l'index des agrégats
+  par session.
+- Test d'intégration PostgreSQL opt-in démontrant le respect exact d'une limite
+  sous concurrence et le nettoyage des données temporaires.
+
+### Fixed
+
+- La garde de reproductibilité échoue désormais immédiatement si la génération
+  Buf ne peut pas s'exécuter, au lieu de comparer silencieusement les anciens
+  fichiers générés.
+
 ## [0.0.4] - 2026-09-17
 
 Cette version livre le cycle de vie persistant et sécurisé des sessions
@@ -92,7 +115,8 @@ invariants du service ; elle ne fournit pas encore le parcours PDF complet.
 - Garde de release vérifiant la version, le README, le changelog, les tests,
   `go vet`, les contrats Protobuf et la reproductibilité de la génération.
 
-[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.4...HEAD
+[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.5...HEAD
+[0.0.5]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.5
 [0.0.4]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.4
 [0.0.3]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.3
 [0.0.2]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.2

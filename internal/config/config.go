@@ -5,6 +5,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -15,6 +16,17 @@ const (
 	defaultMaxUploadBytes int64 = 256 * 1024 * 1024
 	defaultChunkBytes     int64 = 8 * 1024 * 1024
 	defaultTargetBytes    int64 = 75 * 1024 * 1024
+)
+
+const (
+	defaultAnonymousQuotaWindow                  = 24 * time.Hour
+	defaultAnonymousQuotaSessionsPerIP     int64 = 20
+	defaultAnonymousQuotaUploadsPerSession int64 = 10
+	defaultAnonymousQuotaUploadsPerIP      int64 = 50
+	defaultAnonymousQuotaJobsPerSession    int64 = 10
+	defaultAnonymousQuotaJobsPerIP         int64 = 50
+	defaultAnonymousQuotaBytesPerSession   int64 = 1024 * 1024 * 1024
+	defaultAnonymousQuotaBytesPerIP        int64 = 5 * 1024 * 1024 * 1024
 )
 
 // AuthMode controls whether authenticated and anonymous identities are accepted.
@@ -62,6 +74,28 @@ type Anonymous struct {
 	TokenPepper []byte
 	// SessionTTL is the validity period assigned to a new anonymous session.
 	SessionTTL time.Duration
+	// Quotas contains PostgreSQL-backed anonymous usage limits.
+	Quotas AnonymousQuotas
+}
+
+// AnonymousQuotas defines one fixed-window limit policy for public traffic.
+type AnonymousQuotas struct {
+	// Window is the UTC-aligned duration shared by all anonymous counters.
+	Window time.Duration
+	// SessionsPerIP limits session creation attempts from one IP digest.
+	SessionsPerIP int64
+	// UploadsPerSession limits started uploads for one anonymous session.
+	UploadsPerSession int64
+	// UploadsPerIP limits started uploads across sessions sharing an IP digest.
+	UploadsPerIP int64
+	// JobsPerSession limits created PDF jobs for one anonymous session.
+	JobsPerSession int64
+	// JobsPerIP limits created PDF jobs across sessions sharing an IP digest.
+	JobsPerIP int64
+	// BytesPerSession limits committed source bytes for one anonymous session.
+	BytesPerSession int64
+	// BytesPerIP limits committed source bytes across sessions sharing an IP digest.
+	BytesPerIP int64
 }
 
 // Database contains PostgreSQL connection, timeout, and pool settings.
@@ -150,6 +184,10 @@ func Load(lookup LookupEnv) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	anonymousQuotas, err := anonymousQuotasFromEnvironment(lookup)
+	if err != nil {
+		return Config{}, err
+	}
 	database, err := databaseFromEnvironment(lookup)
 	if err != nil {
 		return Config{}, err
@@ -169,6 +207,7 @@ func Load(lookup LookupEnv) (Config, error) {
 		Anonymous: Anonymous{
 			TokenPepper: []byte(value(lookup, "ANONYMOUS_TOKEN_PEPPER", "")),
 			SessionTTL:  anonymousSessionTTL,
+			Quotas:      anonymousQuotas,
 		},
 		Database: database,
 		ObjectStore: ObjectStore{
@@ -214,6 +253,7 @@ func (cfg Config) Validate() error {
 	if cfg.Anonymous.SessionTTL <= 0 {
 		problems = append(problems, errors.New("ANONYMOUS_SESSION_TTL must be positive"))
 	}
+	problems = append(problems, cfg.Anonymous.Quotas.validate()...)
 	problems = append(problems, cfg.Database.validate()...)
 	endpoint, err := url.Parse(cfg.ObjectStore.Endpoint)
 	if err != nil || endpoint.Scheme == "" || endpoint.Host == "" {
@@ -234,6 +274,77 @@ func (cfg Config) Validate() error {
 		problems = append(problems, errors.New("S3_SECRET_ACCESS_KEY is required"))
 	}
 	return errors.Join(problems...)
+}
+
+func anonymousQuotasFromEnvironment(lookup LookupEnv) (AnonymousQuotas, error) {
+	window, err := durationValue(lookup, "ANONYMOUS_QUOTA_WINDOW", defaultAnonymousQuotaWindow)
+	if err != nil {
+		return AnonymousQuotas{}, err
+	}
+	values := []struct {
+		name     string
+		fallback int64
+		target   *int64
+	}{
+		{name: "ANONYMOUS_QUOTA_SESSIONS_PER_IP", fallback: defaultAnonymousQuotaSessionsPerIP},
+		{name: "ANONYMOUS_QUOTA_UPLOADS_PER_SESSION", fallback: defaultAnonymousQuotaUploadsPerSession},
+		{name: "ANONYMOUS_QUOTA_UPLOADS_PER_IP", fallback: defaultAnonymousQuotaUploadsPerIP},
+		{name: "ANONYMOUS_QUOTA_JOBS_PER_SESSION", fallback: defaultAnonymousQuotaJobsPerSession},
+		{name: "ANONYMOUS_QUOTA_JOBS_PER_IP", fallback: defaultAnonymousQuotaJobsPerIP},
+		{name: "ANONYMOUS_QUOTA_BYTES_PER_SESSION", fallback: defaultAnonymousQuotaBytesPerSession},
+		{name: "ANONYMOUS_QUOTA_BYTES_PER_IP", fallback: defaultAnonymousQuotaBytesPerIP},
+	}
+	quotas := AnonymousQuotas{Window: window}
+	values[0].target = &quotas.SessionsPerIP
+	values[1].target = &quotas.UploadsPerSession
+	values[2].target = &quotas.UploadsPerIP
+	values[3].target = &quotas.JobsPerSession
+	values[4].target = &quotas.JobsPerIP
+	values[5].target = &quotas.BytesPerSession
+	values[6].target = &quotas.BytesPerIP
+	for _, item := range values {
+		parsed, err := int64Value(lookup, item.name, item.fallback)
+		if err != nil {
+			return AnonymousQuotas{}, err
+		}
+		*item.target = parsed
+	}
+	return quotas, nil
+}
+
+func (quotas AnonymousQuotas) validate() []error {
+	var problems []error
+	if quotas.Window < time.Minute || quotas.Window%time.Second != 0 {
+		problems = append(problems, errors.New("ANONYMOUS_QUOTA_WINDOW must be at least one minute and use whole seconds"))
+	}
+	countLimits := []struct {
+		name  string
+		value int64
+	}{
+		{name: "ANONYMOUS_QUOTA_SESSIONS_PER_IP", value: quotas.SessionsPerIP},
+		{name: "ANONYMOUS_QUOTA_UPLOADS_PER_SESSION", value: quotas.UploadsPerSession},
+		{name: "ANONYMOUS_QUOTA_UPLOADS_PER_IP", value: quotas.UploadsPerIP},
+		{name: "ANONYMOUS_QUOTA_JOBS_PER_SESSION", value: quotas.JobsPerSession},
+		{name: "ANONYMOUS_QUOTA_JOBS_PER_IP", value: quotas.JobsPerIP},
+	}
+	for _, limit := range countLimits {
+		if limit.value <= 0 || limit.value > math.MaxInt32 {
+			problems = append(problems, fmt.Errorf("%s must be between 1 and %d", limit.name, math.MaxInt32))
+		}
+	}
+	byteLimits := []struct {
+		name  string
+		value int64
+	}{
+		{name: "ANONYMOUS_QUOTA_BYTES_PER_SESSION", value: quotas.BytesPerSession},
+		{name: "ANONYMOUS_QUOTA_BYTES_PER_IP", value: quotas.BytesPerIP},
+	}
+	for _, limit := range byteLimits {
+		if limit.value <= 0 {
+			problems = append(problems, fmt.Errorf("%s must be positive", limit.name))
+		}
+	}
+	return problems
 }
 
 // LoadDatabase parses only PostgreSQL settings. Migration and diagnostic

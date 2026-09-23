@@ -86,7 +86,19 @@ Completion and failure write outbox events in the same database transaction as t
 
 ## Public anonymous protections
 
-Anonymous traffic is constrained by configurable PostgreSQL-backed limits: session creation and upload rates per client IP, active jobs per IP and session, daily byte budget, and global anonymous queue depth. Raw forwarding headers are ignored unless the direct peer belongs to `TRUSTED_PROXY_CIDRS`. HTTP body, header and command timeouts protect against slow clients.
+Anonymous traffic is constrained by configurable PostgreSQL-backed fixed-window
+limits for session creation, upload starts, job creation and committed bytes.
+The job repository and API will additionally bound active jobs per IP and
+session plus global anonymous queue depth. Raw forwarding headers are ignored
+unless the direct peer belongs to `TRUSTED_PROXY_CIDRS`. HTTP body, header and
+command timeouts protect against slow clients.
+
+The initial fixed window is 24 hours. Starting defaults are 20 session
+creations per IP, 10 uploads and jobs per session, 50 uploads and jobs per IP,
+1 GiB committed per session, and 5 GiB committed per IP. These values are
+deployment configuration, not database constants, and must be tuned from
+observed traffic. Session and IP counters are updated in one PostgreSQL
+transaction; exceeding either scope rolls back the complete consumption.
 
 ## Deployment
 

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+	"math"
 	"strings"
 	"testing"
 	"time"
@@ -44,6 +46,78 @@ func TestLoadDefaults(t *testing.T) {
 	}
 	if cfg.Database.MaxConnections != 10 || cfg.Database.MinConnections != 0 {
 		t.Errorf("database pool bounds = %d..%d", cfg.Database.MinConnections, cfg.Database.MaxConnections)
+	}
+	wantQuotas := AnonymousQuotas{
+		Window:            24 * time.Hour,
+		SessionsPerIP:     20,
+		UploadsPerSession: 10,
+		UploadsPerIP:      50,
+		JobsPerSession:    10,
+		JobsPerIP:         50,
+		BytesPerSession:   1024 * 1024 * 1024,
+		BytesPerIP:        5 * 1024 * 1024 * 1024,
+	}
+	if cfg.Anonymous.Quotas != wantQuotas {
+		t.Errorf("Anonymous.Quotas = %#v, want %#v", cfg.Anonymous.Quotas, wantQuotas)
+	}
+}
+
+func TestLoadAnonymousQuotaOverrides(t *testing.T) {
+	t.Parallel()
+
+	values := validEnvironment()
+	values["ANONYMOUS_QUOTA_WINDOW"] = "6h"
+	values["ANONYMOUS_QUOTA_SESSIONS_PER_IP"] = "3"
+	values["ANONYMOUS_QUOTA_UPLOADS_PER_SESSION"] = "4"
+	values["ANONYMOUS_QUOTA_UPLOADS_PER_IP"] = "5"
+	values["ANONYMOUS_QUOTA_JOBS_PER_SESSION"] = "6"
+	values["ANONYMOUS_QUOTA_JOBS_PER_IP"] = "7"
+	values["ANONYMOUS_QUOTA_BYTES_PER_SESSION"] = "800"
+	values["ANONYMOUS_QUOTA_BYTES_PER_IP"] = "900"
+
+	cfg, err := Load(mapLookup(values))
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	want := AnonymousQuotas{
+		Window:            6 * time.Hour,
+		SessionsPerIP:     3,
+		UploadsPerSession: 4,
+		UploadsPerIP:      5,
+		JobsPerSession:    6,
+		JobsPerIP:         7,
+		BytesPerSession:   800,
+		BytesPerIP:        900,
+	}
+	if cfg.Anonymous.Quotas != want {
+		t.Fatalf("Anonymous.Quotas = %#v, want %#v", cfg.Anonymous.Quotas, want)
+	}
+}
+
+func TestLoadRejectsInvalidAnonymousQuotas(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		key   string
+		value string
+	}{
+		{name: "short window", key: "ANONYMOUS_QUOTA_WINDOW", value: "59s"},
+		{name: "fractional window", key: "ANONYMOUS_QUOTA_WINDOW", value: "1m500ms"},
+		{name: "zero count", key: "ANONYMOUS_QUOTA_UPLOADS_PER_IP", value: "0"},
+		{name: "count overflow", key: "ANONYMOUS_QUOTA_JOBS_PER_SESSION", value: fmt.Sprint(int64(math.MaxInt32) + 1)},
+		{name: "negative bytes", key: "ANONYMOUS_QUOTA_BYTES_PER_SESSION", value: "-1"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			values := validEnvironment()
+			values[test.key] = test.value
+			_, err := Load(mapLookup(values))
+			if err == nil || !strings.Contains(err.Error(), test.key) {
+				t.Fatalf("Load() error = %v, want reference to %s", err, test.key)
+			}
+		})
 	}
 }
 
@@ -111,5 +185,14 @@ func mapLookup(values map[string]string) LookupEnv {
 	return func(name string) (string, bool) {
 		value, ok := values[name]
 		return value, ok
+	}
+}
+
+func validEnvironment() map[string]string {
+	return map[string]string{
+		"ANONYMOUS_TOKEN_PEPPER": strings.Repeat("p", 32),
+		"DB_PASSWORD":            "database-secret",
+		"S3_ACCESS_KEY_ID":       "access-key",
+		"S3_SECRET_ACCESS_KEY":   "object-secret",
 	}
 }

@@ -1,6 +1,6 @@
 # Atlas du dépôt go-pdf-forge
 
-Version suivie : **v0.0.4**.
+Version suivie : **v0.0.5**.
 
 Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
 Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
@@ -48,6 +48,7 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 
 - `db/migrations/20260915170000_initial.sql` — Schéma PostgreSQL initial des sessions, uploads, jobs, quotas et outbox.
 - `db/migrations/20260917091500_anonymous_session_digest_lengths.sql` — Contraintes garantissant des digests HMAC complets pour les sessions anonymes.
+- `db/migrations/20260923100000_anonymous_ip_usage.sql` — Agrégats atomiques de quotas par empreinte IP et index des agrégats par session.
 - `db/migrations/embed.go` — Embarquement typé des migrations SQL dans les binaires Go.
 - `internal/database/database.go` — Ouverture, validation et observation non sensible du pool PostgreSQL.
 - `internal/database/database_test.go` — Tests unitaires de configuration et de cycle de vie du pool.
@@ -60,6 +61,11 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `internal/anonymous/token_test.go` — Tests de sécurité et de validation des capacités anonymes.
 - `internal/anonymous/session.go` — Cycle de vie métier des sessions anonymes persistantes.
 - `internal/anonymous/session_test.go` — Tests de création, authentification, expiration et révocation anonymes.
+- `internal/anonymous/quota.go` — Politique de quotas anonymes, fenêtres UTC et dérivation des empreintes IP.
+- `internal/anonymous/quota_test.go` — Tests des limites, fenêtres et consommations métier des quotas anonymes.
+- `internal/anonymous/storage_quota_postgres.go` — Transactions pgx atomiques des compteurs de quotas par session et IP.
+- `internal/anonymous/storage_quota_postgres_integration_test.go` — Test PostgreSQL opt-in de concurrence et de respect exact des quotas.
+- `internal/anonymous/storage_quota_postgres_test.go` — Tests d’ordre de verrouillage, dépassement et rollback des quotas PostgreSQL.
 - `internal/anonymous/storage_postgres.go` — Repository pgx des sessions anonymes ne manipulant que des digests.
 - `internal/anonymous/storage_postgres_test.go` — Tests des requêtes et erreurs du repository de sessions anonymes.
 - `internal/config/config.go` — Chargement et validation centralisés de la configuration applicative.

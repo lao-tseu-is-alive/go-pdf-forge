@@ -84,8 +84,9 @@ func TestEmbeddedMigrationsLoad(t *testing.T) {
 		t.Fatalf("NewMigrator() error = %v", err)
 	}
 	loaded := migrator.Migrations()
-	if len(loaded) != 2 || loaded[0].Version != "20260915170000" || loaded[0].Name != "initial" ||
-		loaded[1].Version != "20260917091500" || loaded[1].Name != "anonymous_session_digest_lengths" {
+	if len(loaded) != 3 || loaded[0].Version != "20260915170000" || loaded[0].Name != "initial" ||
+		loaded[1].Version != "20260917091500" || loaded[1].Name != "anonymous_session_digest_lengths" ||
+		loaded[2].Version != "20260923100000" || loaded[2].Name != "anonymous_ip_usage" {
 		t.Fatalf("embedded migrations = %#v", loaded)
 	}
 }

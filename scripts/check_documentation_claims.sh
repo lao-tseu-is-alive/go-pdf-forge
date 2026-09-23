@@ -31,6 +31,27 @@ require_literal internal/config/config.go 'durationValue(lookup, "JOB_RETENTION"
 require_literal .env.example 'JOB_RETENTION=48h' 'retention environment example'
 require_literal AGENTS.md 'Default retention is 48 hours.' 'retention agent contract'
 
+# Anonymous fixed-window defaults are an operator-facing contract and must not
+# drift independently between runtime configuration and deployment examples.
+require_literal internal/config/config.go 'defaultAnonymousQuotaWindow                  = 24 * time.Hour' 'anonymous quota window source'
+require_literal internal/config/config.go 'defaultAnonymousQuotaSessionsPerIP     int64 = 20' 'anonymous session quota source'
+require_literal internal/config/config.go 'defaultAnonymousQuotaUploadsPerSession int64 = 10' 'anonymous upload session quota source'
+require_literal internal/config/config.go 'defaultAnonymousQuotaUploadsPerIP      int64 = 50' 'anonymous upload IP quota source'
+require_literal internal/config/config.go 'defaultAnonymousQuotaJobsPerSession    int64 = 10' 'anonymous job session quota source'
+require_literal internal/config/config.go 'defaultAnonymousQuotaJobsPerIP         int64 = 50' 'anonymous job IP quota source'
+require_literal internal/config/config.go 'defaultAnonymousQuotaBytesPerSession   int64 = 1024 * 1024 * 1024' 'anonymous byte session quota source'
+require_literal internal/config/config.go 'defaultAnonymousQuotaBytesPerIP        int64 = 5 * 1024 * 1024 * 1024' 'anonymous byte IP quota source'
+require_literal .env.example 'ANONYMOUS_QUOTA_WINDOW=24h' 'anonymous quota window environment example'
+require_literal .env.example 'ANONYMOUS_QUOTA_SESSIONS_PER_IP=20' 'anonymous session quota environment example'
+require_literal .env.example 'ANONYMOUS_QUOTA_UPLOADS_PER_SESSION=10' 'anonymous upload session quota environment example'
+require_literal .env.example 'ANONYMOUS_QUOTA_UPLOADS_PER_IP=50' 'anonymous upload IP quota environment example'
+require_literal .env.example 'ANONYMOUS_QUOTA_JOBS_PER_SESSION=10' 'anonymous job session quota environment example'
+require_literal .env.example 'ANONYMOUS_QUOTA_JOBS_PER_IP=50' 'anonymous job IP quota environment example'
+require_literal .env.example 'ANONYMOUS_QUOTA_BYTES_PER_SESSION=1073741824' 'anonymous byte session quota environment example'
+require_literal .env.example 'ANONYMOUS_QUOTA_BYTES_PER_IP=5368709120' 'anonymous byte IP quota environment example'
+require_literal ARCHITECTURE.md 'The initial fixed window is 24 hours.' 'anonymous quota architecture window'
+require_literal ARCHITECTURE.md 'transaction; exceeding either scope rolls back the complete consumption.' 'anonymous quota atomicity architecture'
+
 # Identity and storage boundaries are security contracts, not optional prose.
 for mode in required optional anonymous; do
     require_literal ARCHITECTURE.md "\`${mode}\`" "authentication mode ${mode}"

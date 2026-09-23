@@ -1,6 +1,6 @@
 # go-pdf-forge Roadmap
 
-Version suivie : **v0.0.4**.
+Version suivie : **v0.0.5**.
 
 Ce document est la source de vérité pour l'ordre d'implémentation. Les décisions
 stables restent dans `AGENTS.md` et `ARCHITECTURE.md`; le détail historique des
@@ -19,7 +19,7 @@ versions reste dans `CHANGELOG.md`.
 ## Prochaine action
 
 La prochaine action est la première tâche non cochée de la phase active : les
-quotas anonymes atomiques par session et empreinte IP.
+uploads persistants, découpés et idempotents.
 
 ## Qualité transverse
 
@@ -33,7 +33,7 @@ quotas anonymes atomiques par session et empreinte IP.
   observabilité non sensible et exécution contrôlée des migrations.
 - [x] **GPF-002 — Sessions anonymes** : créer, retrouver, expirer et révoquer
   une session en ne stockant que le digest de sa capacité.
-- [ ] **GPF-003 — Quotas anonymes** : compteurs PostgreSQL atomiques par session
+- [x] **GPF-003 — Quotas anonymes** : compteurs PostgreSQL atomiques par session
   et empreinte IP, avec limites configurables.
 - [ ] **GPF-004 — Uploads persistants** : sessions et parties idempotentes,
   continuité des indices, tailles et SHA-256.
@@ -134,7 +134,6 @@ aucune notification email n'est proposée aux utilisateurs anonymes.
 ## Décisions encore ouvertes
 
 - Topologie et localisation du Garage de production.
-- Valeurs initiales exactes des quotas anonymes publics.
 - Fournisseur SMTP authentifié pour le VPS et règles de domaine expéditeur.
 - Adresse, ports et terminaison F5 du service interne.
 - Objectifs de disponibilité et capacité attendue avant dimensionnement final.
