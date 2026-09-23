@@ -22,6 +22,10 @@ require_literal internal/config/config.go 'defaultChunkBytes     int64 = 8 * 102
 require_literal .env.example 'UPLOAD_CHUNK_BYTES=8388608' 'chunk size environment example'
 require_literal ARCHITECTURE.md 'default browser chunk is `8MiB`' 'chunk size architecture'
 
+require_literal internal/config/config.go 'durationValue(lookup, "UPLOAD_SESSION_TTL", 24*time.Hour)' 'upload session TTL source'
+require_literal .env.example 'UPLOAD_SESSION_TTL=24h' 'upload session TTL environment example'
+require_literal ARCHITECTURE.md 'an incomplete upload expires after 24 hours by default.' 'upload session TTL architecture'
+
 require_literal internal/config/config.go 'defaultTargetBytes    int64 = 75 * 1024 * 1024' 'PDF target source'
 require_literal .env.example 'PDF_TARGET_BYTES=78643200' 'PDF target environment example'
 require_literal AGENTS.md 'The target size defaults to `75MiB` and is indicative.' 'PDF target agent contract'

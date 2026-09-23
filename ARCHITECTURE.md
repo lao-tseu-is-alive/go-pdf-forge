@@ -51,7 +51,13 @@ Authorization is checked in storage queries as well as service handlers. Authent
 
 ## Upload and object storage
 
-The default browser chunk is `8MiB` and the default upload limit is `256MiB`. `StartUpload` validates declared size and metadata and opens an upload session. `UploadChunk` records the index, byte length, SHA-256 and backend part identifier. Repeating the same index and hash succeeds idempotently; changing an accepted index fails.
+The default browser chunk is `8MiB`, the default upload limit is `256MiB`, and
+an incomplete upload expires after 24 hours by default. `StartUpload` validates
+declared size and metadata and opens an upload session. `UploadChunk` records
+the index, byte length, SHA-256 and backend part identifier. New parts must be
+strictly contiguous from index zero and have the exact expected size. Repeating
+the same index, size and hash succeeds idempotently; changing an accepted index
+fails.
 
 Garage is the first production-shaped `BlobStore` backend. Its multipart implementation prevents the API from buffering the whole input. At commit, the service finalizes the object and verifies the full SHA-256 by streaming it back through a hasher. A job becomes `queued` only after size, chunk continuity and digest checks pass.
 

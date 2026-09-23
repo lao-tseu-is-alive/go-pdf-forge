@@ -8,7 +8,7 @@ const (
 	// Name is the stable application and release artifact name.
 	Name = "go-pdf-forge"
 	// Version is the semantic release version and repository source of truth.
-	Version = "0.0.5"
+	Version = "0.0.6"
 )
 
 var (

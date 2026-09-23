@@ -1,6 +1,6 @@
 # Atlas du dépôt go-pdf-forge
 
-Version suivie : **v0.0.5**.
+Version suivie : **v0.0.6**.
 
 Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
 Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
@@ -49,6 +49,7 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `db/migrations/20260915170000_initial.sql` — Schéma PostgreSQL initial des sessions, uploads, jobs, quotas et outbox.
 - `db/migrations/20260917091500_anonymous_session_digest_lengths.sql` — Contraintes garantissant des digests HMAC complets pour les sessions anonymes.
 - `db/migrations/20260923100000_anonymous_ip_usage.sql` — Agrégats atomiques de quotas par empreinte IP et index des agrégats par session.
+- `db/migrations/20260923110000_upload_integrity_constraints.sql` — Contraintes SQL de cohérence des métadonnées, états et SHA-256 d’upload.
 - `db/migrations/embed.go` — Embarquement typé des migrations SQL dans les binaires Go.
 - `internal/database/database.go` — Ouverture, validation et observation non sensible du pool PostgreSQL.
 - `internal/database/database_test.go` — Tests unitaires de configuration et de cycle de vie du pool.
@@ -74,6 +75,11 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `internal/job/status_test.go` — Tests exhaustifs des transitions et états terminaux des jobs.
 - `internal/smtppoc/client.go` — Construction et envoi direct de messages SMTP selon le mode TLS choisi.
 - `internal/smtppoc/client_test.go` — Tests sans réseau de validation et de composition SMTP.
+- `internal/upload/storage_postgres.go` — Repository pgx des sessions et parties d’upload avec verrouillage transactionnel.
+- `internal/upload/storage_postgres_integration_test.go` — Test PostgreSQL opt-in du cycle persistant complet d’un upload.
+- `internal/upload/storage_postgres_test.go` — Tests des invariants transactionnels, de propriété et d’idempotence des uploads.
+- `internal/upload/upload.go` — Domaine des uploads découpés, propriétaires, digests et transitions persistantes.
+- `internal/upload/upload_test.go` — Tests de validation, sanitation et construction des sessions d’upload.
 - `internal/version/version.go` — Source de vérité de la version et identité des builds.
 - `internal/version/version_test.go` — Tests du rendu de l’identité de version.
 

@@ -1,6 +1,6 @@
 # go-pdf-forge Roadmap
 
-Version suivie : **v0.0.5**.
+Version suivie : **v0.0.6**.
 
 Ce document est la source de vérité pour l'ordre d'implémentation. Les décisions
 stables restent dans `AGENTS.md` et `ARCHITECTURE.md`; le détail historique des
@@ -18,8 +18,8 @@ versions reste dans `CHANGELOG.md`.
 
 ## Prochaine action
 
-La prochaine action est la première tâche non cochée de la phase active : les
-uploads persistants, découpés et idempotents.
+La prochaine action est la première tâche non cochée de la phase active : le
+repository durable des jobs PDF et ses contrôles de propriété.
 
 ## Qualité transverse
 
@@ -35,7 +35,7 @@ uploads persistants, découpés et idempotents.
   une session en ne stockant que le digest de sa capacité.
 - [x] **GPF-003 — Quotas anonymes** : compteurs PostgreSQL atomiques par session
   et empreinte IP, avec limites configurables.
-- [ ] **GPF-004 — Uploads persistants** : sessions et parties idempotentes,
+- [x] **GPF-004 — Uploads persistants** : sessions et parties idempotentes,
   continuité des indices, tailles et SHA-256.
 - [ ] **GPF-005 — Repository des jobs** : création, consultation propriétaire,
   annulation et suppression idempotente.

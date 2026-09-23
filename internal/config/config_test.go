@@ -29,6 +29,9 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.UploadChunkBytes != 8*1024*1024 {
 		t.Errorf("UploadChunkBytes = %d", cfg.UploadChunkBytes)
 	}
+	if cfg.UploadSessionTTL != 24*time.Hour {
+		t.Errorf("UploadSessionTTL = %v", cfg.UploadSessionTTL)
+	}
 	if cfg.PDFTargetBytes != 75*1024*1024 {
 		t.Errorf("PDFTargetBytes = %d", cfg.PDFTargetBytes)
 	}
@@ -91,6 +94,49 @@ func TestLoadAnonymousQuotaOverrides(t *testing.T) {
 	}
 	if cfg.Anonymous.Quotas != want {
 		t.Fatalf("Anonymous.Quotas = %#v, want %#v", cfg.Anonymous.Quotas, want)
+	}
+}
+
+func TestLoadUploadSessionTTLOverride(t *testing.T) {
+	t.Parallel()
+
+	values := validEnvironment()
+	values["UPLOAD_SESSION_TTL"] = "6h"
+	cfg, err := Load(mapLookup(values))
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if cfg.UploadSessionTTL != 6*time.Hour {
+		t.Fatalf("UploadSessionTTL = %v", cfg.UploadSessionTTL)
+	}
+}
+
+func TestLoadRejectsInvalidUploadSettings(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		values map[string]string
+		want   string
+	}{
+		{name: "zero TTL", values: map[string]string{"UPLOAD_SESSION_TTL": "0s"}, want: "UPLOAD_SESSION_TTL"},
+		{name: "chunk integer overflow", values: map[string]string{
+			"MAX_UPLOAD_BYTES":   "4294967296",
+			"UPLOAD_CHUNK_BYTES": "2147483648",
+		}, want: "UPLOAD_CHUNK_BYTES"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			values := validEnvironment()
+			for key, value := range test.values {
+				values[key] = value
+			}
+			_, err := Load(mapLookup(values))
+			if err == nil || !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("Load() error = %v, want reference to %s", err, test.want)
+			}
+		})
 	}
 }
 

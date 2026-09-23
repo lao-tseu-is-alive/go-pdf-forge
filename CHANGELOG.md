@@ -12,6 +12,27 @@ projet utilise le versionnement sémantique.
 - Stockage multipart Garage/S3 et handlers ConnectRPC.
 - Worker Ghostscript et interface Vue.
 
+## [0.0.6] - 2026-09-23
+
+Cette version livre le socle persistant des uploads découpés sans stocker les
+octets PDF dans PostgreSQL ni dépendre d'un filesystem local partagé.
+
+### Added
+
+- **GPF-004** — Sessions d'upload propriétaires et parties PostgreSQL
+  idempotentes, avec indices strictement contigus, tailles exactes et SHA-256
+  canoniques.
+- Transitions durables `uploading`, `committing`, `committed`, `aborted` et
+  `expired`, préparation de commit vérifiant chaque partie et abandon
+  idempotent.
+- Sanitation des noms d'affichage, clés objet opaques et contrôle de propriété
+  authentifiée ou anonyme directement dans les requêtes SQL.
+- Expiration configurable des uploads incomplets, fixée à 24 heures par défaut.
+- Migration append-only renforçant les formats SHA-256, la cohérence du commit,
+  les timestamps et les bornes des métadonnées backend.
+- Test d'intégration PostgreSQL opt-in couvrant le cycle complet, les retries,
+  les trous d'indice, l'isolation propriétaire et le nettoyage final.
+
 ## [0.0.5] - 2026-09-23
 
 Cette version livre les quotas anonymes persistants et atomiques qui protègent
@@ -115,7 +136,8 @@ invariants du service ; elle ne fournit pas encore le parcours PDF complet.
 - Garde de release vérifiant la version, le README, le changelog, les tests,
   `go vet`, les contrats Protobuf et la reproductibilité de la génération.
 
-[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/lao-tseu-is-alive/go-pdf-forge/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.6
 [0.0.5]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.5
 [0.0.4]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.4
 [0.0.3]: https://github.com/lao-tseu-is-alive/go-pdf-forge/releases/tag/v0.0.3

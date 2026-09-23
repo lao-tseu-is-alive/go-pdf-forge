@@ -54,6 +54,8 @@ type Config struct {
 	MaxUploadBytes int64
 	// UploadChunkBytes is the chunk size browsers should use for uploads.
 	UploadChunkBytes int64
+	// UploadSessionTTL is the lifetime of an incomplete browser upload.
+	UploadSessionTTL time.Duration
 	// PDFTargetBytes is the indicative best-effort output-size target.
 	PDFTargetBytes int64
 	// JobRetention determines when completed objects and metadata expire.
@@ -168,6 +170,10 @@ func Load(lookup LookupEnv) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	uploadSessionTTL, err := durationValue(lookup, "UPLOAD_SESSION_TTL", 24*time.Hour)
+	if err != nil {
+		return Config{}, err
+	}
 	targetSize, err := int64Value(lookup, "PDF_TARGET_BYTES", defaultTargetBytes)
 	if err != nil {
 		return Config{}, err
@@ -201,6 +207,7 @@ func Load(lookup LookupEnv) (Config, error) {
 		Auth:              auth,
 		MaxUploadBytes:    maxUpload,
 		UploadChunkBytes:  chunkSize,
+		UploadSessionTTL:  uploadSessionTTL,
 		PDFTargetBytes:    targetSize,
 		JobRetention:      retention,
 		WorkerConcurrency: workerConcurrency,
@@ -232,11 +239,14 @@ func (cfg Config) Validate() error {
 	if cfg.MaxUploadBytes <= 0 {
 		problems = append(problems, errors.New("MAX_UPLOAD_BYTES must be positive"))
 	}
-	if cfg.UploadChunkBytes <= 0 {
-		problems = append(problems, errors.New("UPLOAD_CHUNK_BYTES must be positive"))
+	if cfg.UploadChunkBytes <= 0 || cfg.UploadChunkBytes > math.MaxInt32 {
+		problems = append(problems, fmt.Errorf("UPLOAD_CHUNK_BYTES must be between 1 and %d", math.MaxInt32))
 	}
 	if cfg.MaxUploadBytes > 0 && cfg.UploadChunkBytes > cfg.MaxUploadBytes {
 		problems = append(problems, errors.New("UPLOAD_CHUNK_BYTES must not exceed MAX_UPLOAD_BYTES"))
+	}
+	if cfg.UploadSessionTTL <= 0 {
+		problems = append(problems, errors.New("UPLOAD_SESSION_TTL must be positive"))
 	}
 	if cfg.PDFTargetBytes <= 0 {
 		problems = append(problems, errors.New("PDF_TARGET_BYTES must be positive"))
