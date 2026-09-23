@@ -12,6 +12,21 @@ projet utilise le versionnement sémantique.
 - Stockage multipart Garage/S3 et handlers ConnectRPC.
 - Worker Ghostscript et interface Vue.
 
+## [0.0.7] - 2026-09-23
+
+Cette version transforme la politique documentaire du dépôt en contrat
+normatif, vérifiable et réutilisable par les humains comme par les agents.
+
+### Changed
+
+- Le contrat détaille les responsabilités de chaque composant, les exigences
+  GoDoc et Protobuf, le cycle de maintenance de l'atlas, les promesses
+  exécutables et la chaîne complète jusqu'à la release.
+- Une procédure d'adoption documente la réutilisation du modèle dans d'autres
+  dépôts Go tout en distinguant les conventions propres à `go-pdf-forge`.
+- Les références depuis les instructions agents, le README et la roadmap sont
+  désormais protégées par des assertions exécutables avant chaque release.
+
 ## [0.0.6] - 2026-09-23
 
 Cette version livre le socle persistant des uploads découpés sans stocker les

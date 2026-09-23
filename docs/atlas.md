@@ -1,6 +1,6 @@
 # Atlas du dépôt go-pdf-forge
 
-Version suivie : **v0.0.6**.
+Version suivie : **v0.0.7**.
 
 Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
 Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
@@ -85,7 +85,7 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 
 ## Documentation
 
-- `docs/DOCUMENTATION.md` — Politique vérifiable de qualité et de maintenance documentaire.
+- `docs/DOCUMENTATION.md` — Contrat normatif et réutilisable de qualité documentaire pour humains, agents et releases.
 - `docs/ROADMAP.md` — Source de vérité de l’ordre, du statut et des critères des tâches GPF.
 - `docs/atlas.md` — Inventaire exact fichier par fichier du dépôt.
 - `docs/brief_go_pdf_self_service_agent.docx` — Brief produit original conservé dans son format bureautique source.

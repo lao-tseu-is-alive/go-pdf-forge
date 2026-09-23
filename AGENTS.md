@@ -6,6 +6,14 @@ Build a Go cloud-native PDF self-service application with a Vue/TypeScript front
 
 Read `docs/brief_go_pdf_self_service_agent.md`, `ARCHITECTURE.md`, `docs/ROADMAP.md`, and `docs/DOCUMENTATION.md` before making architectural changes. `docs/ROADMAP.md` is the source of truth for implementation order and task status.
 
+## Documentation quality contract
+
+`docs/DOCUMENTATION.md` is the normative documentation contract for human and
+agent contributors. Read and follow it whenever a change affects Go or
+Protobuf contracts, repository files, stable operational claims, roadmap state
+or a release. Keep the detailed rules centralized there; references in this
+file and the README are entry points, not competing copies.
+
 ## Repository identity
 
 - Repository and application name: `go-pdf-forge`.
@@ -65,10 +73,8 @@ Reuse ideas and contracts deliberately; do not copy obsolete or unsafe implement
 - `internal/version/version.go` is the release version source of truth. A release updates it, the README current-version banner and a versioned `CHANGELOG.md` section in the same commit.
 - Update `docs/ROADMAP.md` whenever a task starts, completes, changes scope, or changes order. Task IDs are stable and must remain unique.
 - Every completed roadmap task must appear by ID in a dated `CHANGELOG.md` section, and every released task ID must be marked complete in the roadmap; `make release-check` enforces both directions.
-- Document every non-generated Go package and exported Go API according to `docs/DOCUMENTATION.md`; comments describe contracts and invariants rather than restating syntax.
-- Keep `docs/atlas.md` synchronized exactly whenever a non-ignored repository file is added, removed or renamed.
-- Keep Protobuf declarations documented under Buf's `COMMENTS` lint category and add executable documentation assertions for stable operational or security claims.
-- Run `make docs-check` for documentation-sensitive changes. It is also part of `make check`, CI and the release gate.
+- Apply the complete contract in `docs/DOCUMENTATION.md`: document Go and Protobuf contracts, keep `docs/atlas.md` exact, and anchor stable operational or security claims with executable assertions when warranted.
+- Run `make docs-check` for documentation-sensitive changes. It is also part of `make check`, CI and the release gate; never bypass a failing documentation control.
 - Before a release commit run `make release-prepare`; after committing, `CONFIRM_RELEASE=vX.Y.Z make release` requires a clean `main`, creates an annotated tag and atomically pushes `main` plus the tag. Never bypass `make release-check`.
 - Treat `.proto` files as authoritative and never hand-edit generated files.
 - Prefer `rg`, existing scripts, Make targets, and `uv` for any Python tooling.

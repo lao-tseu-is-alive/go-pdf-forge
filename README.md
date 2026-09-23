@@ -1,6 +1,6 @@
 # go-pdf-forge
 
-Current version: **v0.0.6** — fondation pré-alpha, le parcours PDF complet est
+Current version: **v0.0.7** — fondation pré-alpha, le parcours PDF complet est
 encore en cours d'implémentation.
 
 Service cloud-native de traitement asynchrone de PDF, écrit en Go, avec une
@@ -12,9 +12,22 @@ Le projet est en construction. Les décisions stabilisées et les limites de
 sécurité sont décrites dans [ARCHITECTURE.md](ARCHITECTURE.md). Le brief source
 se trouve dans [docs/brief_go_pdf_self_service_agent.md](docs/brief_go_pdf_self_service_agent.md)
 et le plan d'action suivi dans [docs/ROADMAP.md](docs/ROADMAP.md).
-La politique de qualité documentaire est définie dans
-[docs/DOCUMENTATION.md](docs/DOCUMENTATION.md), avec un inventaire navigable de
-tous les fichiers dans [docs/atlas.md](docs/atlas.md).
+Le [contrat de qualité documentaire](docs/DOCUMENTATION.md) s'applique aux
+contributeurs humains comme aux agents, avec un inventaire navigable de tous
+les fichiers dans [docs/atlas.md](docs/atlas.md).
+
+## Qualité documentaire
+
+Le contrat décrit précisément les commentaires attendus pour les packages et
+API Go, les contrats Protobuf, la responsabilité fichier par fichier, les
+promesses documentaires exécutables et leur intégration à la release. Il sert
+aussi de modèle d'adoption pour d'autres dépôts Go.
+
+`make docs-check` compose trois contrôles : GoDoc via `cmd/doccheck`, exactitude
+bidirectionnelle de l'atlas via le même outil, puis cohérence des promesses
+stables via `scripts/check_documentation_claims.sh`. Cette garde est reprise par
+`make check`, la CI et `make release-check`; une release ne peut donc pas
+utiliser une politique documentaire plus faible que le développement local.
 
 ## Prérequis de développement
 
@@ -87,8 +100,8 @@ dans la roadmap.
 make release-prepare
 git add <fichiers-relus>
 git diff --cached --check
-git commit -m "chore(release): prepare v0.0.6"
-CONFIRM_RELEASE=v0.0.6 make release
+git commit -m "chore(release): prepare v0.0.7"
+CONFIRM_RELEASE=v0.0.7 make release
 ```
 
 La dernière commande exige une branche `main` propre, recrée tous les contrôles,

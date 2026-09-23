@@ -64,4 +64,12 @@ require_literal AGENTS.md 'Anonymous email notifications are disabled.' 'anonymo
 require_literal ARCHITECTURE.md 'Anonymous sessions cannot request email.' 'anonymous email architecture'
 require_literal ARCHITECTURE.md 'No correctness property relies on an in-memory event hub or a pod-local filesystem.' 'cross-process coordination boundary'
 
+# Documentation governance must remain visible to contributors and must run
+# through the same local, CI and release control chain.
+require_literal AGENTS.md '`docs/DOCUMENTATION.md` is the normative documentation contract' 'agent documentation contract'
+require_literal README.md '[contrat de qualité documentaire](docs/DOCUMENTATION.md)' 'contributor documentation contract'
+require_literal Makefile 'docs-check: godoc-check atlas-check docs-assert' 'documentation gate composition'
+require_literal Makefile 'release-check: check generated-check version-check changelog-check scripts-check roadmap-check release-traceability-check build' 'release gate includes normal checks'
+require_literal .github/workflows/ci.yml 'run: make release-check' 'CI release-equivalent gate'
+
 echo "docs-assert: OK"

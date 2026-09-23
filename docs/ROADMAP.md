@@ -1,6 +1,6 @@
 # go-pdf-forge Roadmap
 
-Version suivie : **v0.0.6**.
+Version suivie : **v0.0.7**.
 
 Ce document est la source de vérité pour l'ordre d'implémentation. Les décisions
 stables restent dans `AGENTS.md` et `ARCHITECTURE.md`; le détail historique des
@@ -23,9 +23,10 @@ repository durable des jobs PDF et ses contrôles de propriété.
 
 ## Qualité transverse
 
-- [x] **GPF-035 — Assurance qualité documentaire** : documenter les contrats Go
-  et Protobuf, maintenir un atlas exact fichier par fichier et bloquer les
-  dérives via `make docs-check`, la CI et la routine de release.
+- [x] **GPF-035 — Assurance qualité documentaire** : appliquer aux humains et
+  aux agents un [contrat documentaire normatif](DOCUMENTATION.md), documenter
+  les contrats Go et Protobuf, maintenir un atlas exact fichier par fichier et
+  bloquer les dérives via `make docs-check`, la CI et la routine de release.
 
 ## Phase 1 — Persistance et file durable
 
