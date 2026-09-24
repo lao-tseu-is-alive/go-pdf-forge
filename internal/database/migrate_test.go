@@ -84,10 +84,11 @@ func TestEmbeddedMigrationsLoad(t *testing.T) {
 		t.Fatalf("NewMigrator() error = %v", err)
 	}
 	loaded := migrator.Migrations()
-	if len(loaded) != 4 || loaded[0].Version != "20260915170000" || loaded[0].Name != "initial" ||
+	if len(loaded) != 5 || loaded[0].Version != "20260915170000" || loaded[0].Name != "initial" ||
 		loaded[1].Version != "20260917091500" || loaded[1].Name != "anonymous_session_digest_lengths" ||
 		loaded[2].Version != "20260923100000" || loaded[2].Name != "anonymous_ip_usage" ||
-		loaded[3].Version != "20260923110000" || loaded[3].Name != "upload_integrity_constraints" {
+		loaded[3].Version != "20260923110000" || loaded[3].Name != "upload_integrity_constraints" ||
+		loaded[4].Version != "20260924100000" || loaded[4].Name != "pdf_job_repository" {
 		t.Fatalf("embedded migrations = %#v", loaded)
 	}
 }

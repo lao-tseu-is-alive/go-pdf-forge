@@ -12,6 +12,21 @@ projet utilise le versionnement sémantique.
 - Stockage multipart Garage/S3 et handlers ConnectRPC.
 - Worker Ghostscript et interface Vue.
 
+## [0.0.8] - 2026-09-24
+
+Cette version livre le repository durable et propriétaire des jobs PDF, prêt
+pour le claim concurrent des workers.
+
+### Added
+
+- **GPF-005** — Repository PostgreSQL des jobs créés atomiquement depuis un
+  upload vérifié, avec consultation strictement propriétaire, annulation
+  coopérative et suppression logique idempotente préparant la purge des blobs.
+- Snapshot d'identité authentifiée, métadonnées d'entrée copiées en SQL,
+  tombstone de suppression et contraintes de cohérence associées.
+- Migration append-only et test PostgreSQL opt-in couvrant création
+  idempotente, isolation propriétaire, annulation et suppression répétée.
+
 ## [0.0.7] - 2026-09-23
 
 Cette version transforme la politique documentaire du dépôt en contrat

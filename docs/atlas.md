@@ -1,6 +1,6 @@
 # Atlas du dépôt go-pdf-forge
 
-Version suivie : **v0.0.7**.
+Version suivie : **v0.0.8**.
 
 Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
 Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
@@ -50,6 +50,7 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `db/migrations/20260917091500_anonymous_session_digest_lengths.sql` — Contraintes garantissant des digests HMAC complets pour les sessions anonymes.
 - `db/migrations/20260923100000_anonymous_ip_usage.sql` — Agrégats atomiques de quotas par empreinte IP et index des agrégats par session.
 - `db/migrations/20260923110000_upload_integrity_constraints.sql` — Contraintes SQL de cohérence des métadonnées, états et SHA-256 d’upload.
+- `db/migrations/20260924100000_pdf_job_repository.sql` — Colonnes et contraintes de cohérence nécessaires au repository durable des jobs.
 - `db/migrations/embed.go` — Embarquement typé des migrations SQL dans les binaires Go.
 - `internal/database/database.go` — Ouverture, validation et observation non sensible du pool PostgreSQL.
 - `internal/database/database_test.go` — Tests unitaires de configuration et de cycle de vie du pool.
@@ -71,8 +72,13 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `internal/anonymous/storage_postgres_test.go` — Tests des requêtes et erreurs du repository de sessions anonymes.
 - `internal/config/config.go` — Chargement et validation centralisés de la configuration applicative.
 - `internal/config/config_test.go` — Tests des valeurs par défaut et des invariants de configuration.
+- `internal/job/job.go` — Domaine, ownership, snapshot d’identité et orchestration des opérations durables sur les jobs.
+- `internal/job/job_test.go` — Tests des politiques de création, d’identité et de délégation du domaine job.
 - `internal/job/status.go` — Machine d’états et transitions autorisées des jobs PDF.
 - `internal/job/status_test.go` — Tests exhaustifs des transitions et états terminaux des jobs.
+- `internal/job/storage_postgres.go` — Repository pgx propriétaire des jobs, annulations et tombstones idempotents.
+- `internal/job/storage_postgres_integration_test.go` — Test PostgreSQL opt-in du cycle propriétaire complet d’un job.
+- `internal/job/storage_postgres_test.go` — Tests des requêtes, contrôles d’ownership et mutations idempotentes des jobs.
 - `internal/smtppoc/client.go` — Construction et envoi direct de messages SMTP selon le mode TLS choisi.
 - `internal/smtppoc/client_test.go` — Tests sans réseau de validation et de composition SMTP.
 - `internal/upload/storage_postgres.go` — Repository pgx des sessions et parties d’upload avec verrouillage transactionnel.

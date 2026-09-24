@@ -63,6 +63,10 @@ done
 require_literal AGENTS.md 'Anonymous email notifications are disabled.' 'anonymous email prohibition'
 require_literal ARCHITECTURE.md 'Anonymous sessions cannot request email.' 'anonymous email architecture'
 require_literal ARCHITECTURE.md 'No correctness property relies on an in-memory event hub or a pod-local filesystem.' 'cross-process coordination boundary'
+require_literal internal/job/storage_postgres.go 'AND owner_user_id IS NOT DISTINCT FROM $3' 'job owner predicate source'
+require_literal ARCHITECTURE.md 'Every user-facing lookup or mutation includes all owner columns in SQL' 'job owner boundary architecture'
+require_literal internal/job/storage_postgres.go 'deletion_requested_at = COALESCE' 'job deletion tombstone source'
+require_literal ARCHITECTURE.md 'User deletion creates a durable `deletion_requested_at` tombstone' 'job deletion tombstone architecture'
 
 # Documentation governance must remain visible to contributors and must run
 # through the same local, CI and release control chain.

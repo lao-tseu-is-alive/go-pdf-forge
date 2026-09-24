@@ -78,6 +78,19 @@ Workers claim queued or retryable jobs in short transactions using `FOR UPDATE S
 
 Running cancellation is cooperative: the API records `cancel_requested_at`; the owning worker observes it and cancels the command context. Closing a browser or SSE connection never requests cancellation.
 
+Job creation is an atomic `INSERT ... SELECT` from an owner-matching committed
+upload. The repository copies the verified object key, complete SHA-256, byte
+size and sanitized filename rather than trusting caller-supplied duplicates.
+Every user-facing lookup or mutation includes all owner columns in SQL; a
+missing job and a job owned by someone else are intentionally indistinguishable.
+
+User deletion creates a durable `deletion_requested_at` tombstone, shortens the
+retention deadline and requests cancellation of active work. Tombstoned jobs
+immediately disappear from owner-facing reads, but their object keys remain
+available to the future purge until blob deletion succeeds. Repeating deletion,
+including for an absent or differently owned job, is safe and reveals no
+ownership information.
+
 ## PDF strategy
 
 Input plausibility checks are followed by `pdfinfo`; encrypted or unreadable input fails with a stable error code. `pdfimages -list` is diagnostic only. External commands receive explicit arguments, deadlines and bounded output capture.
