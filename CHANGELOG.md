@@ -8,9 +8,24 @@ projet utilise le versionnement sémantique.
 
 ### À venir
 
-- Repository PostgreSQL avec gestion des leases et reprise des jobs.
+- Tests PostgreSQL isolés des migrations et des accès concurrents.
 - Stockage multipart Garage/S3 et handlers ConnectRPC.
 - Worker Ghostscript et interface Vue.
+
+## [0.0.9] - 2026-09-24
+
+Cette version rend la file PostgreSQL exploitable par plusieurs workers sans
+coordination en mémoire et avec reprise bornée après interruption.
+
+### Added
+
+- **GPF-006** — Claim PostgreSQL atomique avec `FOR UPDATE SKIP LOCKED`, leases
+  exclusifs, heartbeats et transitions conditionnées par le worker, l'état et
+  la deadline.
+- Reprise bornée des leases expirés avec requeue différée, annulation des jobs
+  demandés et échec stable après épuisement du nombre maximal de tentatives.
+- Tests PostgreSQL opt-in couvrant workers distincts, lease perdu, annulation
+  coopérative, transitions et épuisement des retries.
 
 ## [0.0.8] - 2026-09-24
 

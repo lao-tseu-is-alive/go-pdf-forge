@@ -69,9 +69,9 @@ func ValidateTransition(current, next Status) error {
 
 var transitions = map[Status][]Status{
 	StatusQueued:     {StatusAnalyzing, StatusFailed, StatusCancelled},
-	StatusAnalyzing:  {StatusOptimizing, StatusCompleted, StatusFailed, StatusCancelled},
-	StatusOptimizing: {StatusValidating, StatusFailed, StatusCancelled},
-	StatusValidating: {StatusOptimizing, StatusCompleted, StatusFailed, StatusCancelled},
+	StatusAnalyzing:  {StatusQueued, StatusOptimizing, StatusCompleted, StatusFailed, StatusCancelled},
+	StatusOptimizing: {StatusQueued, StatusValidating, StatusFailed, StatusCancelled},
+	StatusValidating: {StatusQueued, StatusOptimizing, StatusCompleted, StatusFailed, StatusCancelled},
 	StatusCompleted:  {StatusExpired},
 	StatusFailed:     {StatusExpired},
 	StatusCancelled:  {StatusExpired},

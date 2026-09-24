@@ -1,6 +1,6 @@
 # Atlas du dépôt go-pdf-forge
 
-Version suivie : **v0.0.8**.
+Version suivie : **v0.0.9**.
 
 Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
 Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
@@ -74,10 +74,15 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `internal/config/config_test.go` — Tests des valeurs par défaut et des invariants de configuration.
 - `internal/job/job.go` — Domaine, ownership, snapshot d’identité et orchestration des opérations durables sur les jobs.
 - `internal/job/job_test.go` — Tests des politiques de création, d’identité et de délégation du domaine job.
+- `internal/job/queue.go` — Politique worker des claims, leases, transitions et reprises bornées de jobs.
+- `internal/job/queue_test.go` — Tests des durées, identités worker et validations de transitions de la queue.
 - `internal/job/status.go` — Machine d’états et transitions autorisées des jobs PDF.
 - `internal/job/status_test.go` — Tests exhaustifs des transitions et états terminaux des jobs.
 - `internal/job/storage_postgres.go` — Repository pgx propriétaire des jobs, annulations et tombstones idempotents.
 - `internal/job/storage_postgres_integration_test.go` — Test PostgreSQL opt-in du cycle propriétaire complet d’un job.
+- `internal/job/storage_postgres_queue.go` — Claims SKIP LOCKED, heartbeats, transitions sous lease et reprise PostgreSQL.
+- `internal/job/storage_postgres_queue_integration_test.go` — Test PostgreSQL opt-in avec workers distincts, lease perdu et retries épuisés.
+- `internal/job/storage_postgres_queue_test.go` — Tests SQL des prédicats de claim, heartbeat, transition et récupération.
 - `internal/job/storage_postgres_test.go` — Tests des requêtes, contrôles d’ownership et mutations idempotentes des jobs.
 - `internal/smtppoc/client.go` — Construction et envoi direct de messages SMTP selon le mode TLS choisi.
 - `internal/smtppoc/client_test.go` — Tests sans réseau de validation et de composition SMTP.

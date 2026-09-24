@@ -1,6 +1,6 @@
 # go-pdf-forge Roadmap
 
-Version suivie : **v0.0.8**.
+Version suivie : **v0.0.9**.
 
 Ce document est la source de vérité pour l'ordre d'implémentation. Les décisions
 stables restent dans `AGENTS.md` et `ARCHITECTURE.md`; le détail historique des
@@ -18,8 +18,8 @@ versions reste dans `CHANGELOG.md`.
 
 ## Prochaine action
 
-La prochaine action est la première tâche non cochée de la phase active : le
-claim concurrent des jobs, ses leases, heartbeats et mécanismes de reprise.
+La prochaine action est la première tâche non cochée de la phase active : les
+tests PostgreSQL de migrations et de concurrence sur une base isolée.
 
 ## Qualité transverse
 
@@ -40,7 +40,7 @@ claim concurrent des jobs, ses leases, heartbeats et mécanismes de reprise.
   continuité des indices, tailles et SHA-256.
 - [x] **GPF-005 — Repository des jobs** : création, consultation propriétaire,
   annulation et suppression idempotente.
-- [ ] **GPF-006 — Claim et leases** : `FOR UPDATE SKIP LOCKED`, heartbeat,
+- [x] **GPF-006 — Claim et leases** : `FOR UPDATE SKIP LOCKED`, heartbeat,
   transitions conditionnelles et reprise des leases expirés.
 - [ ] **GPF-007 — Tests PostgreSQL** : migrations aller/retour et tests
   d'intégration concurrents sur une base isolée.

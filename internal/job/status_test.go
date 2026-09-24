@@ -12,6 +12,7 @@ func TestValidateTransition(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "claim", current: StatusQueued, next: StatusAnalyzing},
+		{name: "recover expired lease", current: StatusOptimizing, next: StatusQueued},
 		{name: "input already meets target", current: StatusAnalyzing, next: StatusCompleted},
 		{name: "validate another profile", current: StatusValidating, next: StatusOptimizing},
 		{name: "expire result", current: StatusCompleted, next: StatusExpired},

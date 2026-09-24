@@ -67,6 +67,10 @@ require_literal internal/job/storage_postgres.go 'AND owner_user_id IS NOT DISTI
 require_literal ARCHITECTURE.md 'Every user-facing lookup or mutation includes all owner columns in SQL' 'job owner boundary architecture'
 require_literal internal/job/storage_postgres.go 'deletion_requested_at = COALESCE' 'job deletion tombstone source'
 require_literal ARCHITECTURE.md 'User deletion creates a durable `deletion_requested_at` tombstone' 'job deletion tombstone architecture'
+require_literal internal/job/storage_postgres_queue.go 'FOR UPDATE SKIP LOCKED' 'job claim and recovery locking source'
+require_literal internal/job/storage_postgres_queue.go 'AND lease_expires_at > $3' 'heartbeat lease deadline source'
+require_literal ARCHITECTURE.md 'A lease deadline is exclusive.' 'lease deadline architecture'
+require_literal ARCHITECTURE.md 'Recovery locks a bounded expired-lease batch with `SKIP LOCKED`.' 'lease recovery architecture'
 
 # Documentation governance must remain visible to contributors and must run
 # through the same local, CI and release control chain.

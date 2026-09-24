@@ -76,6 +76,20 @@ completed/failed/cancelled -> expired
 
 Workers claim queued or retryable jobs in short transactions using `FOR UPDATE SKIP LOCKED`. A claim records a worker ID, lease deadline, attempt count and heartbeat. External processing happens after the claim transaction commits. Expired leases are recoverable. State transitions use expected-state predicates to prevent stale workers from overwriting newer decisions.
 
+The claim orders eligible jobs by availability and creation time, changes the
+winner from `queued` to `analyzing`, and records its first start time in the
+same statement as the row lock. A lease deadline is exclusive. Heartbeats and
+phase transitions require the current worker ID, an active status and an
+unexpired deadline; terminal transitions clear the lease. Progress cannot move
+backwards within one attempt.
+
+Recovery locks a bounded expired-lease batch with `SKIP LOCKED`. Jobs with a
+cancellation or deletion request become `cancelled`, jobs at `max_attempts`
+become `failed`, and the remainder return to `queued` after their configured
+retry delay. Requeue resets indicative progress but preserves attempt count and
+the first start time. This makes process death recoverable without an in-memory
+coordinator and prevents a stale worker from completing work after lease loss.
+
 Running cancellation is cooperative: the API records `cancel_requested_at`; the owning worker observes it and cancels the command context. Closing a browser or SSE connection never requests cancellation.
 
 Job creation is an atomic `INSERT ... SELECT` from an owner-matching committed
