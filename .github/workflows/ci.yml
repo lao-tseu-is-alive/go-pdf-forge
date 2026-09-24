@@ -11,6 +11,28 @@ permissions:
 jobs:
   release-check:
     runs-on: ubuntu-latest
+    env:
+      DB_DRIVER: postgres
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_NAME: go_pdf_forge_test
+      DB_USER: go_pdf_forge_test
+      DB_PASSWORD: integration-test-only
+      DB_SSL_MODE: disable
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: go_pdf_forge_test
+          POSTGRES_USER: go_pdf_forge_test
+          POSTGRES_PASSWORD: integration-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U go_pdf_forge_test -d go_pdf_forge_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -24,3 +46,4 @@ jobs:
       - name: Install Buf
         run: go install github.com/bufbuild/buf/cmd/buf@v1.73.0
       - run: make release-check
+      - run: make postgres-test

@@ -7,7 +7,7 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS := -s -w -X $(VERSION_PKG).Commit=$(GIT_COMMIT) -X $(VERSION_PKG).Date=$(BUILD_DATE)
 
-.PHONY: atlas-check build changelog-check check docs-assert docs-check fmt generate generated-check godoc-check proto-check release release-check release-prepare release-traceability-check roadmap-check scripts-check test version-check vet
+.PHONY: atlas-check build changelog-check check docs-assert docs-check fmt generate generated-check godoc-check postgres-test proto-check release release-check release-prepare release-traceability-check roadmap-check scripts-check test version-check vet
 
 generate:
 	$(BUF) generate
@@ -32,6 +32,9 @@ proto-check:
 
 test:
 	$(GO) test ./...
+
+postgres-test:
+	GPF_POSTGRES_TESTS=1 $(GO) test ./... -count=1
 
 vet:
 	$(GO) vet ./...

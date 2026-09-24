@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/config"
-	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/database"
+	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/testpostgres"
 )
 
 func TestPostgresQuotaStoreConcurrentLimit(t *testing.T) {
@@ -27,11 +27,18 @@ func TestPostgresQuotaStoreConcurrentLimit(t *testing.T) {
 		t.Fatalf("LoadDatabase() error = %v", err)
 	}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	pool, err := database.Open(context.Background(), databaseConfig, "quota-integration-test", logger)
+	environment, err := testpostgres.Open(context.Background(), databaseConfig, "quota-integration-test", logger)
 	if err != nil {
-		t.Fatalf("database.Open() error = %v", err)
+		t.Fatalf("testpostgres.Open() error = %v", err)
 	}
-	t.Cleanup(pool.Close)
+	t.Cleanup(func() {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := environment.Close(cleanupCtx); err != nil {
+			t.Errorf("testpostgres.Close() error = %v", err)
+		}
+	})
+	pool := environment.Pool
 
 	pepper := make([]byte, 32)
 	if _, err := rand.Read(pepper); err != nil {
@@ -55,17 +62,6 @@ INSERT INTO anonymous_session (
 		capability.SessionID, capability.Digest[:], ipDigest[:], now, now.Add(time.Hour)); err != nil {
 		t.Fatalf("insert test session: %v", err)
 	}
-	t.Cleanup(func() {
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if _, err := pool.Exec(cleanupCtx, `DELETE FROM anonymous_session WHERE id = $1`, capability.SessionID); err != nil {
-			t.Errorf("delete test session: %v", err)
-		}
-		if _, err := pool.Exec(cleanupCtx, `DELETE FROM anonymous_ip_usage WHERE ip_hash = $1`, ipDigest[:]); err != nil {
-			t.Errorf("delete test IP counters: %v", err)
-		}
-	})
-
 	limits := QuotaLimits{
 		Window:            time.Hour,
 		SessionsPerIP:     3,

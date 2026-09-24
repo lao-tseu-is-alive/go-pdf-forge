@@ -16,6 +16,28 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      DB_DRIVER: postgres
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_NAME: go_pdf_forge_test
+      DB_USER: go_pdf_forge_test
+      DB_PASSWORD: integration-test-only
+      DB_SSL_MODE: disable
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: go_pdf_forge_test
+          POSTGRES_USER: go_pdf_forge_test
+          POSTGRES_PASSWORD: integration-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U go_pdf_forge_test -d go_pdf_forge_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Resolve release tag
         id: target
@@ -52,6 +74,7 @@ jobs:
           test "$RELEASE_TAG" = "v$source_version" || {
             echo "::error::tag $RELEASE_TAG does not match source v$source_version"; exit 1; }
           make release-check
+          make postgres-test
 
       - name: Build release archive
         env:

@@ -29,6 +29,15 @@ Garage/S3 <----------------- pdf-worker (bounded concurrency)
 
 PostgreSQL and object storage are the only cross-process coordination mechanisms. No correctness property relies on an in-memory event hub or a pod-local filesystem.
 
+PostgreSQL integration tests run against a random schema per test. Each isolated
+pool has that schema as its sole search path, applies the embedded migrations,
+and drops the schema with `CASCADE` during cleanup. The migration suite runs two
+concurrent upgrade attempts under the advisory lock, then verifies a complete
+down/up round trip. Queue tests start more concurrent workers than available
+jobs and prove that `SKIP LOCKED` never attributes a job twice. CI and release
+publication provide a dedicated PostgreSQL service for this opt-in suite; normal
+unit tests and `make check` remain database-independent.
+
 ## Identity and ownership
 
 The runtime supports three configured modes:

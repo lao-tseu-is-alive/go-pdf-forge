@@ -210,6 +210,7 @@ make release-check
 make release-prepare -> make release-check before the release commit
 make release         -> make release-check again on clean main, tag, atomic push
 GitHub CI/release    -> make release-check on remote runners
+                     -> make postgres-test with a dedicated PostgreSQL service
 ```
 
 A contributor or agent MUST NOT bypass a failing documentation gate. Fix the

@@ -4,15 +4,17 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/config"
-	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/database"
+	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/testpostgres"
 	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/upload"
 )
 
@@ -21,25 +23,7 @@ func TestPostgresQueueClaimsLeasesTransitionsAndRecovers(t *testing.T) {
 		t.Skip("set GPF_POSTGRES_TESTS=1 to run PostgreSQL integration tests")
 	}
 
-	databaseConfig, err := config.LoadDatabase(os.LookupEnv)
-	if err != nil {
-		t.Fatalf("LoadDatabase() error = %v", err)
-	}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	pool, err := database.Open(context.Background(), databaseConfig, "job-queue-integration-test", logger)
-	if err != nil {
-		t.Fatalf("database.Open() error = %v", err)
-	}
-	t.Cleanup(pool.Close)
-
-	store, err := NewPostgresStore(pool)
-	if err != nil {
-		t.Fatalf("NewPostgresStore() error = %v", err)
-	}
-	manager, err := NewManager(store, 75*1024*1024, 48*time.Hour, 3)
-	if err != nil {
-		t.Fatalf("NewManager() error = %v", err)
-	}
+	pool, store, manager := openQueueIntegration(t, "job-queue-integration-test")
 	owner, _ := NewAuthenticatedOwner(515151)
 	first := createQueueIntegrationJob(t, pool, manager, owner, "queue-first.pdf")
 	second := createQueueIntegrationJob(t, pool, manager, owner, "queue-second.pdf")
@@ -118,6 +102,97 @@ func TestPostgresQueueClaimsLeasesTransitionsAndRecovers(t *testing.T) {
 	}
 }
 
+func TestPostgresQueueConcurrentClaimsAreUnique(t *testing.T) {
+	if os.Getenv("GPF_POSTGRES_TESTS") != "1" {
+		t.Skip("set GPF_POSTGRES_TESTS=1 to run PostgreSQL integration tests")
+	}
+
+	pool, store, manager := openQueueIntegration(t, "job-queue-concurrency-test")
+	owner, _ := NewAuthenticatedOwner(515151)
+	const jobCount = 12
+	created := make(map[string]struct{}, jobCount)
+	for index := range jobCount {
+		job := createQueueIntegrationJob(t, pool, manager, owner, fmt.Sprintf("queue-concurrent-%02d.pdf", index))
+		created[job.ID] = struct{}{}
+	}
+
+	const extraWorkers = 4
+	type claimResult struct {
+		job Job
+		err error
+	}
+	start := make(chan struct{})
+	results := make(chan claimResult, jobCount+extraWorkers)
+	var wait sync.WaitGroup
+	for index := range jobCount + extraWorkers {
+		queue, err := NewQueue(store, fmt.Sprintf("concurrent-worker-%02d", index), time.Minute, 0, 10)
+		if err != nil {
+			t.Fatalf("NewQueue() error = %v", err)
+		}
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			<-start
+			job, err := queue.Claim(context.Background())
+			results <- claimResult{job: job, err: err}
+		}()
+	}
+	close(start)
+	wait.Wait()
+	close(results)
+
+	claimed := make(map[string]struct{}, jobCount)
+	noJob := 0
+	for result := range results {
+		switch {
+		case result.err == nil:
+			if _, duplicate := claimed[result.job.ID]; duplicate {
+				t.Errorf("job %s was claimed more than once", result.job.ID)
+			}
+			if _, exists := created[result.job.ID]; !exists {
+				t.Errorf("claimed unknown job %s", result.job.ID)
+			}
+			claimed[result.job.ID] = struct{}{}
+		case errors.Is(result.err, ErrNoJobAvailable):
+			noJob++
+		default:
+			t.Errorf("concurrent Claim() error = %v", result.err)
+		}
+	}
+	if len(claimed) != jobCount || noJob != extraWorkers {
+		t.Fatalf("concurrent claims unique=%d unavailable=%d, want %d and %d", len(claimed), noJob, jobCount, extraWorkers)
+	}
+}
+
+func openQueueIntegration(t *testing.T, component string) (*pgxpool.Pool, *PostgresStore, *Manager) {
+	t.Helper()
+	databaseConfig, err := config.LoadDatabase(os.LookupEnv)
+	if err != nil {
+		t.Fatalf("LoadDatabase() error = %v", err)
+	}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	environment, err := testpostgres.Open(context.Background(), databaseConfig, component, logger)
+	if err != nil {
+		t.Fatalf("testpostgres.Open() error = %v", err)
+	}
+	t.Cleanup(func() {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := environment.Close(cleanupCtx); err != nil {
+			t.Errorf("testpostgres.Close() error = %v", err)
+		}
+	})
+	store, err := NewPostgresStore(environment.Pool)
+	if err != nil {
+		t.Fatalf("NewPostgresStore() error = %v", err)
+	}
+	manager, err := NewManager(store, 75*1024*1024, 48*time.Hour, 3)
+	if err != nil {
+		t.Fatalf("NewManager() error = %v", err)
+	}
+	return environment.Pool, store, manager
+}
+
 func createQueueIntegrationJob(t *testing.T, pool *pgxpool.Pool, manager *Manager, owner Owner, filename string) Job {
 	t.Helper()
 	uploadStore, err := upload.NewPostgresStore(pool)
@@ -133,16 +208,6 @@ func createQueueIntegrationJob(t *testing.T, pool *pgxpool.Pool, manager *Manage
 	if err != nil {
 		t.Fatalf("upload Start() error = %v", err)
 	}
-	t.Cleanup(func() {
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if _, err := pool.Exec(cleanupCtx, `DELETE FROM pdf_job WHERE upload_id = $1`, createdUpload.ID); err != nil {
-			t.Errorf("delete queue integration job: %v", err)
-		}
-		if _, err := pool.Exec(cleanupCtx, `DELETE FROM upload_session WHERE id = $1`, createdUpload.ID); err != nil {
-			t.Errorf("delete queue integration upload: %v", err)
-		}
-	})
 	partDigest := upload.SHA256(sha256.Sum256([]byte("part")))
 	if _, err := uploadManager.RecordPart(context.Background(), uploadOwner, createdUpload.ID, 0, 4, partDigest, "backend-part"); err != nil {
 		t.Fatalf("upload RecordPart() error = %v", err)

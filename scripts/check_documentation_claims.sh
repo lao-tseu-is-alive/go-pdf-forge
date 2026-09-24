@@ -80,4 +80,13 @@ require_literal Makefile 'docs-check: godoc-check atlas-check docs-assert' 'docu
 require_literal Makefile 'release-check: check generated-check version-check changelog-check scripts-check roadmap-check release-traceability-check build' 'release gate includes normal checks'
 require_literal .github/workflows/ci.yml 'run: make release-check' 'CI release-equivalent gate'
 
+# Stateful integration tests remain isolated from the shared public schema and
+# run remotely against an explicit PostgreSQL service.
+require_literal internal/database/testschema.go 'poolConfig.ConnConfig.RuntimeParams["search_path"] = name' 'PostgreSQL test schema isolation'
+require_literal internal/database/testschema.go 'DROP SCHEMA IF EXISTS ' 'PostgreSQL test schema cleanup'
+require_literal Makefile 'GPF_POSTGRES_TESTS=1 $(GO) test ./... -count=1' 'PostgreSQL integration test target'
+require_literal .github/workflows/ci.yml 'run: make postgres-test' 'CI PostgreSQL integration suite'
+require_literal .github/workflows/release.yml 'make postgres-test' 'release PostgreSQL integration suite'
+require_literal ARCHITECTURE.md 'PostgreSQL integration tests run against a random schema per test.' 'PostgreSQL test isolation architecture'
+
 echo "docs-assert: OK"

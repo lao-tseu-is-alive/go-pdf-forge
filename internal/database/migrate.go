@@ -54,6 +54,13 @@ type MigrationResult struct {
 	Applied []Migration
 }
 
+// MigrationRollbackResult reports migrations reverted by one DownAll
+// invocation. Rollbacks exist only to verify migrations in isolated tests.
+type MigrationRollbackResult struct {
+	// Reverted is ordered from the newest to the oldest reverted migration.
+	Reverted []Migration
+}
+
 type beginner interface {
 	Begin(context.Context) (pgx.Tx, error)
 }
@@ -121,18 +128,8 @@ CREATE TABLE IF NOT EXISTS schema_migration (
 	if err != nil {
 		return result, err
 	}
-	known := make(map[string]Migration, len(migrator.migrations))
-	for _, migration := range migrator.migrations {
-		known[migration.Version] = migration
-	}
-	for version, record := range applied {
-		migration, ok := known[version]
-		if !ok {
-			return result, fmt.Errorf("database contains migration %s unknown to this binary", version)
-		}
-		if record.name != migration.Name || !bytes.Equal(record.checksum, migration.Checksum[:]) {
-			return result, fmt.Errorf("migration %s differs from the applied immutable history", version)
-		}
+	if err = validateAppliedMigrationHistory(migrator.migrations, applied); err != nil {
+		return result, err
 	}
 
 	for _, migration := range migrator.migrations {
@@ -159,9 +156,94 @@ CREATE TABLE IF NOT EXISTS schema_migration (
 	return result, nil
 }
 
+// DownAll serializes migration runners and reverts every applied migration in
+// reverse order within one transaction. It is intended solely for disposable,
+// isolated integration-test schemas and is deliberately not exposed by the
+// migration command.
+func (migrator *Migrator) DownAll(ctx context.Context, db beginner) (result MigrationRollbackResult, err error) {
+	if db == nil {
+		return result, errors.New("migration database is required")
+	}
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return result, &operationError{operation: "begin migration rollback transaction", cause: err}
+	}
+	defer func() {
+		if err != nil {
+			rollbackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+			defer cancel()
+			_ = tx.Rollback(rollbackCtx)
+		}
+	}()
+
+	if _, err = tx.Exec(ctx, `SELECT pg_advisory_xact_lock($1)`, migrationAdvisoryLock); err != nil {
+		return result, &operationError{operation: "acquire migration rollback lock", cause: err}
+	}
+	applied, err := readAppliedMigrations(ctx, tx)
+	if err != nil {
+		return result, err
+	}
+	if err = validateAppliedMigrationHistory(migrator.migrations, applied); err != nil {
+		return result, err
+	}
+
+	for index := len(migrator.migrations) - 1; index >= 0; index-- {
+		migration := migrator.migrations[index]
+		if _, ok := applied[migration.Version]; !ok {
+			continue
+		}
+		if _, err = tx.Exec(ctx, migration.DownSQL, pgx.QueryExecModeSimpleProtocol); err != nil {
+			return result, &operationError{operation: "revert migration " + migration.Version, cause: err}
+		}
+		if _, err = tx.Exec(ctx, `DELETE FROM schema_migration WHERE version = $1`, migration.Version); err != nil {
+			return result, &operationError{operation: "remove migration record " + migration.Version, cause: err}
+		}
+		result.Reverted = append(result.Reverted, migration)
+	}
+	if _, err = tx.Exec(ctx, `DROP TABLE schema_migration`); err != nil {
+		return result, &operationError{operation: "remove migration ledger", cause: err}
+	}
+	if err = tx.Commit(ctx); err != nil {
+		return MigrationRollbackResult{}, &operationError{operation: "commit migration rollback", cause: err}
+	}
+	for _, migration := range result.Reverted {
+		migrator.logger.Info("postgres migration reverted", "version", migration.Version, "name", migration.Name)
+	}
+	return result, nil
+}
+
 type appliedMigration struct {
 	name     string
 	checksum []byte
+}
+
+func validateAppliedMigrationHistory(migrations []Migration, applied map[string]appliedMigration) error {
+	known := make(map[string]Migration, len(migrations))
+	for _, migration := range migrations {
+		known[migration.Version] = migration
+	}
+	for version, record := range applied {
+		migration, ok := known[version]
+		if !ok {
+			return fmt.Errorf("database contains migration %s unknown to this binary", version)
+		}
+		if record.name != migration.Name || !bytes.Equal(record.checksum, migration.Checksum[:]) {
+			return fmt.Errorf("migration %s differs from the applied immutable history", version)
+		}
+	}
+
+	missing := ""
+	for _, migration := range migrations {
+		_, isApplied := applied[migration.Version]
+		if !isApplied && missing == "" {
+			missing = migration.Version
+			continue
+		}
+		if isApplied && missing != "" {
+			return fmt.Errorf("migration history has applied version %s after missing version %s", migration.Version, missing)
+		}
+	}
+	return nil
 }
 
 func readAppliedMigrations(ctx context.Context, tx pgx.Tx) (map[string]appliedMigration, error) {

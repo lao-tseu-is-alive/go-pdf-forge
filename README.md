@@ -1,6 +1,6 @@
 # go-pdf-forge
 
-Current version: **v0.0.9** — fondation pré-alpha, le parcours PDF complet est
+Current version: **v0.0.10** — fondation pré-alpha, le parcours PDF complet est
 encore en cours d'implémentation.
 
 Service cloud-native de traitement asynchrone de PDF, écrit en Go, avec une
@@ -47,6 +47,7 @@ les commandes du dépôt et ne doit pas être commité.
 ```bash
 make generate       # génère les clients/serveurs Go et TypeScript
 make test           # lance les tests Go
+make postgres-test  # migrations et concurrence sur des schémas isolés
 make docs-check     # contrôle GoDoc, atlas et promesses documentées
 make check          # format, lint, tests, vet et documentation
 make build          # construit les binaires présents dans cmd/
@@ -65,6 +66,11 @@ go run ./cmd/pdf-migrate --up    # connexion et mutation explicites
 
 Le runner embarqué sérialise les exécutions, vérifie le checksum de l'historique
 et applique toutes les migrations pendantes dans une transaction.
+`make postgres-test` est la seule commande de test qui crée des schémas dans la
+base configurée : chaque test reçoit un schéma aléatoire, applique les migrations
+embarquées puis le supprime avec toutes ses données. Elle ne modifie jamais le
+schéma `public`. Cette suite est exécutée avec un PostgreSQL dédié en CI et lors
+de la publication d'une release.
 
 ## POC SMTP
 
@@ -100,8 +106,8 @@ dans la roadmap.
 make release-prepare
 git add <fichiers-relus>
 git diff --cached --check
-git commit -m "chore(release): prepare v0.0.9"
-CONFIRM_RELEASE=v0.0.9 make release
+git commit -m "chore(release): prepare v0.0.10"
+CONFIRM_RELEASE=v0.0.10 make release
 ```
 
 La dernière commande exige une branche `main` propre, recrée tous les contrôles,

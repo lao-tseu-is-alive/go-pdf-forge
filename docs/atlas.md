@@ -1,6 +1,6 @@
 # Atlas du dépôt go-pdf-forge
 
-Version suivie : **v0.0.9**.
+Version suivie : **v0.0.10**.
 
 Cet index attribue à chaque fichier non ignoré une responsabilité explicite.
 Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
@@ -55,7 +55,9 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `internal/database/database.go` — Ouverture, validation et observation non sensible du pool PostgreSQL.
 - `internal/database/database_test.go` — Tests unitaires de configuration et de cycle de vie du pool.
 - `internal/database/migrate.go` — Chargement, checksum et exécution transactionnelle des migrations.
+- `internal/database/migrate_postgres_integration_test.go` — Test PostgreSQL opt-in de concurrence et du cycle complet up/down/up des migrations dans un schéma jetable.
 - `internal/database/migrate_test.go` — Tests du catalogue, des checksums et du comportement du migrateur.
+- `internal/database/testschema.go` — Cycle de vie d’un schéma PostgreSQL aléatoire et de son pool isolé pour les tests d’intégration.
 
 ## Domaine et infrastructure interne
 
@@ -86,6 +88,7 @@ Les chemins sont contrôlés dans les deux directions par `make atlas-check`.
 - `internal/job/storage_postgres_test.go` — Tests des requêtes, contrôles d’ownership et mutations idempotentes des jobs.
 - `internal/smtppoc/client.go` — Construction et envoi direct de messages SMTP selon le mode TLS choisi.
 - `internal/smtppoc/client_test.go` — Tests sans réseau de validation et de composition SMTP.
+- `internal/testpostgres/postgres.go` — Harnais commun créant un schéma PostgreSQL jetable et y appliquant les migrations embarquées.
 - `internal/upload/storage_postgres.go` — Repository pgx des sessions et parties d’upload avec verrouillage transactionnel.
 - `internal/upload/storage_postgres_integration_test.go` — Test PostgreSQL opt-in du cycle persistant complet d’un upload.
 - `internal/upload/storage_postgres_test.go` — Tests des invariants transactionnels, de propriété et d’idempotence des uploads.

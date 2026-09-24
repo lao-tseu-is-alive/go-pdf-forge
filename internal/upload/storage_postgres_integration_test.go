@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/config"
-	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/database"
+	"github.com/lao-tseu-is-alive/go-pdf-forge/internal/testpostgres"
 )
 
 func TestPostgresStoreUploadLifecycle(t *testing.T) {
@@ -24,11 +24,18 @@ func TestPostgresStoreUploadLifecycle(t *testing.T) {
 		t.Fatalf("LoadDatabase() error = %v", err)
 	}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	pool, err := database.Open(context.Background(), databaseConfig, "upload-integration-test", logger)
+	environment, err := testpostgres.Open(context.Background(), databaseConfig, "upload-integration-test", logger)
 	if err != nil {
-		t.Fatalf("database.Open() error = %v", err)
+		t.Fatalf("testpostgres.Open() error = %v", err)
 	}
-	t.Cleanup(pool.Close)
+	t.Cleanup(func() {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := environment.Close(cleanupCtx); err != nil {
+			t.Errorf("testpostgres.Close() error = %v", err)
+		}
+	})
+	pool := environment.Pool
 	store, err := NewPostgresStore(pool)
 	if err != nil {
 		t.Fatalf("NewPostgresStore() error = %v", err)
@@ -42,14 +49,6 @@ func TestPostgresStoreUploadLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Start() error = %v", err)
 	}
-	t.Cleanup(func() {
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if _, err := pool.Exec(cleanupCtx, `DELETE FROM upload_session WHERE id = $1`, created.ID); err != nil {
-			t.Errorf("delete integration upload: %v", err)
-		}
-	})
-
 	if _, err := store.Get(context.Background(), created.ID, Owner{Kind: OwnerAuthenticated, UserID: 424243}); !errors.Is(err, ErrNotFound) {
 		t.Fatalf("Get(other owner) error = %v", err)
 	}

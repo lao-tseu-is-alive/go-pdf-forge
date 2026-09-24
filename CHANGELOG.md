@@ -8,9 +8,30 @@ projet utilise le versionnement sémantique.
 
 ### À venir
 
-- Tests PostgreSQL isolés des migrations et des accès concurrents.
 - Stockage multipart Garage/S3 et handlers ConnectRPC.
 - Worker Ghostscript et interface Vue.
+
+## [0.0.10] - 2026-09-24
+
+Cette version termine la phase de persistance avec une preuve reproductible des
+migrations et des accès concurrents sur PostgreSQL.
+
+### Added
+
+- **GPF-007** — Harnais PostgreSQL créant un schéma aléatoire isolé par test,
+  appliquant les migrations embarquées et supprimant automatiquement toutes les
+  données de test.
+- Cycle concurrent `up/down/up` validant l'advisory lock, l'ordre inverse des
+  rollbacks et la réapplication complète des migrations.
+- Test de claims simultanés démontrant l'absence de double attribution avec
+  davantage de workers que de jobs disponibles.
+- Commande `make postgres-test` exécutée sur un PostgreSQL dédié par la CI et le
+  workflow de publication.
+
+### Changed
+
+- Tous les tests d'intégration PostgreSQL utilisent désormais des schémas
+  jetables au lieu du schéma local partagé.
 
 ## [0.0.9] - 2026-09-24
 

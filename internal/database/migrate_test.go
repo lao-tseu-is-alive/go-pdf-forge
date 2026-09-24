@@ -93,6 +93,21 @@ func TestEmbeddedMigrationsLoad(t *testing.T) {
 	}
 }
 
+func TestValidateAppliedMigrationHistoryRejectsGap(t *testing.T) {
+	t.Parallel()
+
+	migrations := []Migration{
+		{Version: "20260915170000", Name: "first", Checksum: sha256.Sum256([]byte("first"))},
+		{Version: "20260916110000", Name: "second", Checksum: sha256.Sum256([]byte("second"))},
+	}
+	applied := map[string]appliedMigration{
+		migrations[1].Version: {name: migrations[1].Name, checksum: migrations[1].Checksum[:]},
+	}
+	if err := validateAppliedMigrationHistory(migrations, applied); err == nil {
+		t.Fatal("validateAppliedMigrationHistory() error = nil")
+	}
+}
+
 func validMigration() []byte {
 	return []byte("-- migrate:up\nSELECT 1;\n-- migrate:down\nSELECT 2;\n")
 }

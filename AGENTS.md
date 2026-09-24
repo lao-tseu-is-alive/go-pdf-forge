@@ -80,3 +80,4 @@ Reuse ideas and contracts deliberately; do not copy obsolete or unsafe implement
 - Prefer `rg`, existing scripts, Make targets, and `uv` for any Python tooling.
 - Do not run migrations against a real database, send email, create buckets/keys, deploy, or change external infrastructure without explicit user authorization.
 - Before handoff, run the relevant subset of `gofmt`, `go test ./...`, `go vet ./...`, `buf lint`, frontend typecheck/tests/build, and container/manifests validation.
+- PostgreSQL integration tests must use the disposable schema harness in `internal/testpostgres`; never point test cleanup at the shared `public` schema. Run them with `make postgres-test` only against an explicitly configured development or CI database.
